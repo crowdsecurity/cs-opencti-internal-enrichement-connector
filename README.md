@@ -1,4 +1,4 @@
-# OpenCTI CrowdSec Connector
+# OpenCTI CrowdSec internal enrichment connector
 
 This is a OpenCTI connector which enriches your knowledge by using CrowdSec's CTI API.
 Architecturally it is an independent python process which has access to the OpenCTI instance and CrowdSec's CTI API. It enriches knowledge about every incoming IP in OpenCTI by looking it up in CrowdSec CTI.
@@ -10,15 +10,15 @@ Architecturally it is an independent python process which has access to the Open
 - OpenCTI Platform >= 5.3.7
 
 ### Configuration
-#### Recommanded default
+#### Recommended default
 
   - OPENCTI_URL=http://opencti:8080
   - OPENCTI_TOKEN=<your OpenCTI API token>
   - CONNECTOR_ID=<a valid UUIV_v4>
   - CROWDSEC_MAX_TLP=TLP:AMBER
   - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
-  - CONNECTOR_NAME=crowdsec
-  - CROWDSEC_NAME=crowdsec
+  - CONNECTOR_NAME=CrowdSec
+  - CROWDSEC_NAME=CrowdSec
   - CROWDSEC_DESCRIPTION="CrowdSec CTI enrichment"
   - CONNECTOR_SCOPE=IPv4-Addr # MIME type or Stix Object
   - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
