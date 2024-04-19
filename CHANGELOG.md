@@ -10,6 +10,22 @@ functions provided by the `src` folder and the following files: `docker-compose.
 
 ---
 
+## [1.1.0](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/releases/tag/v1.1.0) - 2024-??-??
+[_Compare with previous release_](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/compare/v1.0.0...v1.1.0)
+
+### Changed
+
+- Change default recommended name from `crowdsec` to `CrowdSec`
+- Change CTI url to the console one
+
+### Added
+
+- Add notes in observable
+- Add label types (`reputation`, `scenario`, `behavior`, `cve`, `mitre techniques` ) and associated colors
+- And configurations to enable/disable each label type
+
+---
+
 ## [1.0.0](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/releases/tag/v1.0.0) - 2024-04-19
 
 - Initial release

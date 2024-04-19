@@ -1,9 +1,9 @@
 opencti:
   url: 'http://localhost:8080'
-  token: ChangeMe
+  token: 'ChangeMe'
 
 connector:
-  id: ChangeMe
+  id: 'ChangeMe'
   type: 'INTERNAL_ENRICHMENT'
   name: 'CrowdSec'
   scope: 'IPv4-Addr' # MIME type or SCO
@@ -12,8 +12,22 @@ connector:
   auto: true
 
 crowdsec:
-  key: ChangeMe
+  key: 'ChangeMe'
   api_version: v2
-  name: CrowdSec
-  description: CrowdSec CTI
+  name: 'CrowdSec'
+  description: 'CrowdSec CTI'
   max_tlp: 'TLP:AMBER'
+  labels_scenario_use: true
+  labels_scenario_only_name: false
+  labels_scenario_color: '#2E2A14'
+  labels_cve_use: false
+  labels_cve_color: '#800080'
+  labels_mitre_use: false
+  labels_mitre_color: '#000080'
+  labels_behavior_use: false
+  labels_behavior_color: '#808000'
+  labels_reputation_use: false
+  labels_reputation_malicious_color: '#FF0000'
+  labels_reputation_suspicious_color: '#FFA500'
+  labels_reputation_safe_color': '#00BFFF'
+  labels_reputation_known_color: '#808080'

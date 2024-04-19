@@ -1,0 +1,25 @@
+services:
+  connector-crowdsec:
+    build:
+      context: ../crowdsec-opencti-internal-enrichment-connector/
+      dockerfile: Dockerfile-dev
+    volumes:
+      - ../crowdsec-opencti-internal-enrichment-connector/src:/opt/opencti-crowdsec
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID='ChangeMe' # Add connector ID (any valid UUID v4)
+      - CROWDSEC_MAX_TLP=TLP:AMBER
+      - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
+      - CONNECTOR_NAME=CrowdSec
+      - CROWDSEC_NAME=CrowdSec
+      - CROWDSEC_DESCRIPTION=crowdsec_cti_enrichment
+      - CONNECTOR_SCOPE=IPv4-Addr # MIME type or Stix Object
+      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=debug
+      - CROWDSEC_KEY='ChangeMe' # Add API Key
+      - CROWDSEC_VERSION=v2 # v2 is the only supported version for now
+    restart: always
+    depends_on:
+      - opencti
+
