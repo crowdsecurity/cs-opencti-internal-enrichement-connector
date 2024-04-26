@@ -1,7 +1,7 @@
 services:
   connector-crowdsec:
     build:
-      context: ../crowdsec-opencti-internal-enrichment-connector/
+      context: ../crowdsec-opencti-internal-enrichment-connector/dev
       dockerfile: Dockerfile-dev
     volumes:
       - ../crowdsec-opencti-internal-enrichment-connector/src:/opt/opencti-crowdsec
