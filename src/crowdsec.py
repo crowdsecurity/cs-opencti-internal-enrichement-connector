@@ -57,7 +57,10 @@ class CrowdSecConnector:
             "CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], config
         )
         self.labels_scenario_use = get_config_variable(
-            "LABELS_SCENARIO_USE", ["crowdsec", "labels_scenario_use"], config, default=True
+            "LABELS_SCENARIO_USE",
+            ["crowdsec", "labels_scenario_use"],
+            config,
+            default=True,
         )
         self.labels_scenario_only_name = get_config_variable(
             "LABELS_SCENARIO_ONLY_NAME",
@@ -133,13 +136,19 @@ class CrowdSecConnector:
         )
 
         raw_indicator_create_from = get_config_variable(
-            "INDICATOR_CREATE_FROM", ["crowdsec", "indicator_create_from"], config, default='malicious,suspicious,known'
+            "INDICATOR_CREATE_FROM",
+            ["crowdsec", "indicator_create_from"],
+            config,
+            default="malicious,suspicious,known",
         )
 
         self.indicator_create_from = raw_indicator_create_from.split(",")
 
         self.attack_pattern_create_from_mitre = get_config_variable(
-            "ATTACK_PATTERN_CREATE_FROM_MITRE", ["crowdsec", "attack_pattern_create_from_mitre"], config, default=False
+            "ATTACK_PATTERN_CREATE_FROM_MITRE",
+            ["crowdsec", "attack_pattern_create_from_mitre"],
+            config,
+            default=False,
         )
 
         if self.crowdsec_api_version != "v2":
@@ -167,8 +176,10 @@ class CrowdSecConnector:
                 return {"reputation": "unknown"}
             elif resp.status_code == 429:
                 raise QuotaExceedException(
-                    ("Quota exceeded for CrowdSec CTI API. "
-                     "Please visit https://www.crowdsec.net/pricing to upgrade your plan.")
+                    (
+                        "Quota exceeded for CrowdSec CTI API. "
+                        "Please visit https://www.crowdsec.net/pricing to upgrade your plan."
+                    )
                 )
             elif resp.status_code == 200:
                 return resp.json()
@@ -251,10 +262,12 @@ class CrowdSecConnector:
                 valid_from=first_seen,
                 valid_until=last_seen,
                 confidence=_get_confidence_level(confidence),
-                indicator_types=["malicious-activity"] if reputation == "malicious" else [],
+                indicator_types=(
+                    ["malicious-activity"] if reputation == "malicious" else []
+                ),
                 createdBy=self.get_or_create_crowdsec_ent_id(),
                 objectMarking=observable["objectMarkingIds"],
-                update=True
+                update=True,
             )
             self.helper.api.indicator.add_stix_cyber_observable(
                 id=indicator["id"], stix_cyber_observable_id=observable_id
@@ -263,13 +276,15 @@ class CrowdSecConnector:
         # Handle mitre_techniques
         attack_patterns = []
         for mitre_technique in mitre_techniques:
-            description = f"{mitre_technique['label']}: {mitre_technique['description']}"
+            description = (
+                f"{mitre_technique['label']}: {mitre_technique['description']}"
+            )
             name = f"MITRE ATT&CK ({mitre_technique['label']})"
             # External reference
             mitre_external_reference = self.helper.api.external_reference.create(
                 source_name=name,
                 url=f"{self.mitre_techniques_url}{mitre_technique['name']}",
-                description=description
+                description=description,
             )
             self.helper.api.stix_cyber_observable.add_external_reference(
                 id=observable_id, external_reference_id=mitre_external_reference["id"]
@@ -279,12 +294,12 @@ class CrowdSecConnector:
             if indicator and self.attack_pattern_create_from_mitre:
                 attack_pattern = self.helper.api.attack_pattern.create(
                     name=name,
-                    x_mitre_id=mitre_technique['name'],
+                    x_mitre_id=mitre_technique["name"],
                     description=description,
                     createdBy=self.get_or_create_crowdsec_ent_id(),
                     objectMarking=observable["objectMarkingIds"],
                     update=True,
-                    externalReferences=[mitre_external_reference["id"]]
+                    externalReferences=[mitre_external_reference["id"]],
                 )
                 attack_patterns.append(attack_pattern["id"])
                 self.helper.api.stix_core_relationship.create(
@@ -295,7 +310,7 @@ class CrowdSecConnector:
                 )
             # Mitre techniques labels
             if self.labels_mitre_use:
-                labels.append((mitre_technique['name'], labels_mitre_color))
+                labels.append((mitre_technique["name"], labels_mitre_color))
         # Handle references
         for reference in references:
             if (
@@ -304,13 +319,16 @@ class CrowdSecConnector:
                 and reference["references"][0].startswith("http")
             ):
                 first_reference = reference["references"][0]
-                reference_external_reference = self.helper.api.external_reference.create(
-                    source_name=reference["label"],
-                    url=first_reference,
-                    description=reference["description"],
+                reference_external_reference = (
+                    self.helper.api.external_reference.create(
+                        source_name=reference["label"],
+                        url=first_reference,
+                        description=reference["description"],
+                    )
                 )
                 self.helper.api.stix_cyber_observable.add_external_reference(
-                    id=observable_id, external_reference_id=reference_external_reference["id"]
+                    id=observable_id,
+                    external_reference_id=reference_external_reference["id"],
                 )
                 external_reference_ids.append(reference_external_reference["id"])
 
@@ -318,18 +336,26 @@ class CrowdSecConnector:
         if self.labels_reputation_use and reputation:
             color_attribute = f"labels_reputation_{reputation}_color"
             color = getattr(self, color_attribute, None)
-            if reputation != 'unknown' and color is not None:
+            if reputation != "unknown" and color is not None:
                 labels.append((reputation, color))
         # Scenarios labels
         if self.labels_scenario_use:
             # We handle CVE labels separately to avoid duplicates
-            filtered_scenarios = [scenario for scenario in attack_details
-                                  if not CVE_REGEX.search(scenario["name"])]
+            filtered_scenarios = [
+                scenario
+                for scenario in attack_details
+                if not CVE_REGEX.search(scenario["name"])
+            ]
 
-            scenario_names = [(attack["name"], scenario_label_color) for attack in filtered_scenarios]
+            scenario_names = [
+                (attack["name"], scenario_label_color) for attack in filtered_scenarios
+            ]
             labels.extend(scenario_names)
             if not self.labels_scenario_only_name:
-                scenario_labels = [(attack["label"], scenario_label_color) for attack in filtered_scenarios]
+                scenario_labels = [
+                    (attack["label"], scenario_label_color)
+                    for attack in filtered_scenarios
+                ]
                 labels.extend(scenario_labels)
 
         # Handle CVEs
@@ -380,7 +406,9 @@ class CrowdSecConnector:
 
         # Create labels
         for value, color in labels:
-            label = self.helper.api.label.read_or_create_unchecked(value=value, color=color)
+            label = self.helper.api.label.read_or_create_unchecked(
+                value=value, color=color
+            )
             if label is not None:
                 self.helper.api.stix_cyber_observable.add_label(
                     id=observable_id, label_id=label["id"]
@@ -399,9 +427,15 @@ class CrowdSecConnector:
             if behaviors:
                 content += f"**Behaviors**: \n\n"
                 for behavior in behaviors:
-                    content += "- " + behavior['label'] + ": " + behavior["description"] + "\n\n"
+                    content += (
+                        "- "
+                        + behavior["label"]
+                        + ": "
+                        + behavior["description"]
+                        + "\n\n"
+                    )
                     if self.labels_behavior_use:
-                        labels.append((behavior['name'], labels_behavior_color))
+                        labels.append((behavior["name"], labels_behavior_color))
 
             if target_countries:
                 content += f"**Most targeted countries**: \n\n"
@@ -416,7 +450,7 @@ class CrowdSecConnector:
             objectMarking=observable["objectMarkingIds"],
             abstract=f"CrowdSec enrichment",
             note_types=["external"],
-            update=False
+            update=False,
         )
         self.helper.api.note.add_stix_object_or_stix_relationship(
             id=note["id"], stixObjectOrStixRelationshipId=observable_id
