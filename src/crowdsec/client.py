@@ -16,6 +16,7 @@ class QuotaExceedException(Exception):
 @dataclass
 class CrowdSecClient:
     """CrowdSec client."""
+
     helper: OpenCTIConnectorHelper
     url: str
     api_key: str
@@ -45,4 +46,4 @@ class CrowdSecClient:
                 self.helper.log_warning(
                     f"CrowdSec CTI returned {resp.status_code} response status code. Retrying.."
                 )
-            sleep(2 ** i)
+            sleep(2**i)

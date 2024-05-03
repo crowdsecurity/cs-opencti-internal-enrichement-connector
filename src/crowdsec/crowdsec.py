@@ -6,10 +6,7 @@ from typing import Dict, Any
 from urllib.parse import urljoin
 
 import yaml
-from pycti import (
-    OpenCTIConnectorHelper,
-    get_config_variable
-)
+from pycti import OpenCTIConnectorHelper, get_config_variable
 
 from .builder import CrowdSecBuilder
 from .client import CrowdSecClient, QuotaExceedException
@@ -76,7 +73,10 @@ class CrowdSecConnector:
         self.helper.metric.state("running")
         observable_id = observable["standard_id"]
         ip = observable["value"]
-        observable_markings = [objectMarking["standard_id"] for objectMarking in observable["objectMarking"]]
+        observable_markings = [
+            objectMarking["standard_id"]
+            for objectMarking in observable["objectMarking"]
+        ]
         indicator = None
         # Initialize bundle with observable
         self.builder.add_to_bundle([stix_observable])
@@ -94,7 +94,7 @@ class CrowdSecConnector:
             target=stix_observable,
             source_name="CrowdSec CTI",
             url=urljoin(CTI_URL, ip),
-            description="CrowdSec CTI url for this IP"
+            description="CrowdSec CTI url for this IP",
         )
         # Initialize external reference for sightings
         sighting_ext_refs = [cti_external_reference]
@@ -113,20 +113,35 @@ class CrowdSecConnector:
         origin_city = cti_data.get("location", {}).get("city", "")
 
         # Handle labels
-        self.builder.handle_labels(reputation=reputation, cves=cves, behaviors=behaviors, attack_details=attack_details,
-                                   mitre_techniques=mitre_techniques, observable_id=observable_id)
+        self.builder.handle_labels(
+            reputation=reputation,
+            cves=cves,
+            behaviors=behaviors,
+            attack_details=attack_details,
+            mitre_techniques=mitre_techniques,
+            observable_id=observable_id,
+        )
 
         # Start Bundle creation
         # Handle reputation
         if reputation in self.indicator_create_from:
             pattern = f"[ipv4-addr:value = '{ip}']"
-            indicator = self.builder.add_indicator_based_on(observable_id, ip, pattern, observable_markings,
-                                                            reputation, confidence,
-                                                            last_seen, references)
+            indicator = self.builder.add_indicator_based_on(
+                observable_id,
+                ip,
+                pattern,
+                observable_markings,
+                reputation,
+                confidence,
+                last_seen,
+                references,
+            )
         # Handle mitre_techniques
         attack_patterns = []
         for mitre_technique in mitre_techniques:
-            mitre_external_reference = self.builder.create_external_ref_for_mitre(mitre_technique)
+            mitre_external_reference = self.builder.create_external_ref_for_mitre(
+                mitre_technique
+            )
             sighting_ext_refs.append(mitre_external_reference)
             # Create attack pattern
             if indicator and self.attack_pattern_create_from_mitre:
@@ -140,10 +155,14 @@ class CrowdSecConnector:
         # Handle CVEs
         for cve in cves:
             # Create vulnerability
-            self.builder.add_vulnerability_from_cve(cve, observable_markings, observable_id)
+            self.builder.add_vulnerability_from_cve(
+                cve, observable_markings, observable_id
+            )
         # Handle target countries
         if attack_patterns:
-            self.builder.handle_target_countries(target_countries, attack_patterns, observable_markings)
+            self.builder.handle_target_countries(
+                target_countries, attack_patterns, observable_markings
+            )
         # Add note
         self.builder.add_note(
             observable_id=observable_id,
