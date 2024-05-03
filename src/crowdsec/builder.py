@@ -202,6 +202,7 @@ class CrowdSecBuilder:
     def add_indicator_based_on(
         self,
         observable_id: str,
+        stix_observable: dict,
         ip: str,
         pattern: str,
         observable_markings: List,
@@ -225,6 +226,9 @@ class CrowdSecBuilder:
             indicator_types=(
                 ["malicious-activity"] if reputation == "malicious" else []
             ),
+            custom_properties={
+                "x_opencti_main_observable_type": stix_observable["x_opencti_type"],
+            }
         )
 
         relationship = Relationship(

@@ -131,6 +131,7 @@ class CrowdSecConnector:
             pattern = f"[ipv4-addr:value = '{ip}']"
             indicator = self.builder.add_indicator_based_on(
                 observable_id,
+                stix_observable,
                 ip,
                 pattern,
                 observable_markings,
