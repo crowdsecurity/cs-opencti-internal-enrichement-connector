@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """CrowdSec internal enrichment module."""
 import os
+from re import sub
 from pathlib import Path
 from typing import Dict, Any
 from urllib.parse import urljoin
@@ -43,7 +44,9 @@ class CrowdSecConnector:
             default="",
         )
 
-        self.indicator_create_from = raw_indicator_create_from.split(",")
+        self.indicator_create_from = sub(r"[\"']", "", raw_indicator_create_from).split(
+            ","
+        )
 
         self.attack_pattern_create_from_mitre = get_config_variable(
             "CROWDSEC_ATTACK_PATTERN_CREATE_FROM_MITRE",
@@ -186,7 +189,7 @@ class CrowdSecConnector:
             observable_markings=observable_markings,
             sighting_ext_refs=sighting_ext_refs,
             indicator=indicator if indicator else None,
-            )
+        )
         # End of Bundle creation
         # Send Bundle to OpenCTI workers
         self.builder.send_bundle()

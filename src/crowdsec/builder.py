@@ -71,7 +71,10 @@ class CrowdSecBuilder:
             default="#2E2A14",
         )
         self.labels_cve_use = get_config_variable(
-            "CROWDSEC_LABELS_CVE_USE", ["crowdsec", "labels_cve_use"], config, default=False
+            "CROWDSEC_LABELS_CVE_USE",
+            ["crowdsec", "labels_cve_use"],
+            config,
+            default=False,
         )
         self.labels_cve_color = get_config_variable(
             "CROWDSEC_LABELS_SCENARIO_COLOR",
@@ -92,7 +95,10 @@ class CrowdSecBuilder:
             default="#808000",
         )
         self.labels_mitre_use = get_config_variable(
-            "CROWDSEC_LABELS_MITRE_USE", ["crowdsec", "labels_mitre_use"], config, default=False
+            "CROWDSEC_LABELS_MITRE_USE",
+            ["crowdsec", "labels_mitre_use"],
+            config,
+            default=False,
         )
         self.labels_mitre_color = get_config_variable(
             "CROWDSEC_LABELS_MITRE_COLOR",
