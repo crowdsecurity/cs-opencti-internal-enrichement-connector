@@ -37,7 +37,7 @@ class CrowdSecConnector:
             "CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], config
         )
         raw_indicator_create_from = get_config_variable(
-            "INDICATOR_CREATE_FROM",
+            "CROWDSEC_INDICATOR_CREATE_FROM",
             ["crowdsec", "indicator_create_from"],
             config,
             default="",
@@ -46,7 +46,7 @@ class CrowdSecConnector:
         self.indicator_create_from = raw_indicator_create_from.split(",")
 
         self.attack_pattern_create_from_mitre = get_config_variable(
-            "ATTACK_PATTERN_CREATE_FROM_MITRE",
+            "CROWDSEC_ATTACK_PATTERN_CREATE_FROM_MITRE",
             ["crowdsec", "attack_pattern_create_from_mitre"],
             config,
             default=False,

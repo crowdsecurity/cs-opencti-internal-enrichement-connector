@@ -53,79 +53,79 @@ class CrowdSecBuilder:
         self.crowdsec_ent = None
         self.bundle_objects = []
         self.labels_scenario_use = get_config_variable(
-            "LABELS_SCENARIO_USE",
+            "CROWDSEC_LABELS_SCENARIO_USE",
             ["crowdsec", "labels_scenario_use"],
             config,
             default=True,
         )
         self.labels_scenario_only_name = get_config_variable(
-            "LABELS_SCENARIO_ONLY_NAME",
+            "CROWDSEC_LABELS_SCENARIO_ONLY_NAME",
             ["crowdsec", "labels_scenario_only_name"],
             config,
             default=False,
         )
         self.labels_scenario_color = get_config_variable(
-            "LABELS_SCENARIO_COLOR",
+            "CROWDSEC_LABELS_SCENARIO_COLOR",
             ["crowdsec", "labels_scenario_color"],
             config,
             default="#2E2A14",
         )
         self.labels_cve_use = get_config_variable(
-            "LABELS_CVE_USE", ["crowdsec", "labels_cve_use"], config, default=False
+            "CROWDSEC_LABELS_CVE_USE", ["crowdsec", "labels_cve_use"], config, default=False
         )
         self.labels_cve_color = get_config_variable(
-            "LABELS_SCENARIO_COLOR",
+            "CROWDSEC_LABELS_SCENARIO_COLOR",
             ["crowdsec", "labels_scenario_color"],
             config,
             default="#800080",
         )
         self.labels_behavior_use = get_config_variable(
-            "LABELS_BEHAVIOR_USE",
+            "CROWDSEC_LABELS_BEHAVIOR_USE",
             ["crowdsec", "labels_behavior_use"],
             config,
             default=False,
         )
         self.labels_behavior_color = get_config_variable(
-            "LABELS_BEHAVIOR_COLOR",
+            "CROWDSEC_LABELS_BEHAVIOR_COLOR",
             ["crowdsec", "labels_behavior_color"],
             config,
             default="#808000",
         )
         self.labels_mitre_use = get_config_variable(
-            "LABELS_MITRE_USE", ["crowdsec", "labels_mitre_use"], config, default=False
+            "CROWDSEC_LABELS_MITRE_USE", ["crowdsec", "labels_mitre_use"], config, default=False
         )
         self.labels_mitre_color = get_config_variable(
-            "LABELS_MITRE_COLOR",
+            "CROWDSEC_LABELS_MITRE_COLOR",
             ["crowdsec", "labels_mitre_color"],
             config,
             default="#000080",
         )
         self.labels_reputation_use = get_config_variable(
-            "LABELS_REPUTATION_USE",
+            "CROWDSEC_LABELS_REPUTATION_USE",
             ["crowdsec", "labels_reputation_use"],
             config,
             default=False,
         )
         self.labels_reputation_malicious_color = get_config_variable(
-            "LABELS_REPUTATION_MALICIOUS_COLOR",
+            "CROWDSEC_LABELS_REPUTATION_MALICIOUS_COLOR",
             ["crowdsec", "labels_reputation_malicious_color"],
             config,
             default="#FF0000",
         )
         self.labels_reputation_suspicious_color = get_config_variable(
-            "LABELS_REPUTATION_SUSPICIOUS_COLOR",
+            "CROWDSEC_LABELS_REPUTATION_SUSPICIOUS_COLOR",
             ["crowdsec", "labels_reputation_suspicious_color"],
             config,
             default="#FFA500",
         )
         self.labels_reputation_safe_color = get_config_variable(
-            "LABELS_REPUTATION_SAFE_COLOR",
+            "CROWDSEC_LABELS_REPUTATION_SAFE_COLOR",
             ["crowdsec", "labels_reputation_safe_color"],
             config,
             default="#00BFFF",
         )
         self.labels_reputation_known_color = get_config_variable(
-            "LABELS_REPUTATION_KNOWN_COLOR",
+            "CROWDSEC_LABELS_REPUTATION_KNOWN_COLOR",
             ["crowdsec", "labels_reputation_known_color"],
             config,
             default="#808080",
