@@ -178,15 +178,14 @@ class CrowdSecConnector:
             observable_markings=observable_markings,
         )
         # Create sightings relationship between CrowdSec organisation and observable
-        if indicator:
-            self.builder.add_sighting(
-                observable_id=observable_id,
-                first_seen=first_seen,
-                last_seen=last_seen,
-                confidence=confidence,
-                observable_markings=observable_markings,
-                sighting_ext_refs=sighting_ext_refs,
-                indicator=indicator,
+        self.builder.add_sighting(
+            observable_id=observable_id,
+            first_seen=first_seen,
+            last_seen=last_seen,
+            confidence=confidence,
+            observable_markings=observable_markings,
+            sighting_ext_refs=sighting_ext_refs,
+            indicator=indicator if indicator else None,
             )
         # End of Bundle creation
         # Send Bundle to OpenCTI workers
