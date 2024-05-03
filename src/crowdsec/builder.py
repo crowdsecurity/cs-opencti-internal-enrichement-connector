@@ -324,6 +324,7 @@ class CrowdSecBuilder:
         indicator: Indicator,
     ) -> None:
 
+        fake_indicator_id = "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8"
         sighting = Sighting(
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
             description=self.crowdsec_ent_desc,
@@ -337,7 +338,7 @@ class CrowdSecBuilder:
             confidence=_get_confidence_level(confidence),
             object_marking_refs=observable_markings,
             external_references=sighting_ext_refs,
-            sighting_of_ref=indicator.id if indicator else None,
+            sighting_of_ref=indicator.id if indicator else fake_indicator_id,
             where_sighted_refs=[self.get_or_create_crowdsec_ent()["standard_id"]],
             custom_properties={"x_opencti_sighting_of_ref": observable_id},
         )
