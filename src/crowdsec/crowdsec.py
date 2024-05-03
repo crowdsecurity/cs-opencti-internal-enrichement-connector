@@ -40,7 +40,7 @@ class CrowdSecConnector:
             "INDICATOR_CREATE_FROM",
             ["crowdsec", "indicator_create_from"],
             config,
-            default="malicious,suspicious,known",
+            default="",
         )
 
         self.indicator_create_from = raw_indicator_create_from.split(",")
