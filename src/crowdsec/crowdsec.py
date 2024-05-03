@@ -21,27 +21,27 @@ class CrowdSecConnector:
         self.crowdsec_ent = None
 
         config_file_path = Path(__file__).parent.parent.resolve() / "config.yml"
-        config = (
+        self.config = (
             yaml.load(open(config_file_path), Loader=yaml.FullLoader)
             if os.path.isfile(config_file_path)
             else {}
         )
-        self.helper = OpenCTIConnectorHelper(config)
+        self.helper = OpenCTIConnectorHelper(self.config)
         self.crowdsec_cti_key = clean_config(
-            get_config_variable("CROWDSEC_KEY", ["crowdsec", "key"], config)
+            get_config_variable("CROWDSEC_KEY", ["crowdsec", "key"], self.config)
         )
         self.crowdsec_api_version = clean_config(
-            get_config_variable("CROWDSEC_VERSION", ["crowdsec", "api_version"], config)
+            get_config_variable("CROWDSEC_VERSION", ["crowdsec", "api_version"], self.config)
         )
 
         self.max_tlp = clean_config(
-            get_config_variable("CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], config)
+            get_config_variable("CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], self.config)
         )
         raw_indicator_create_from = clean_config(
             get_config_variable(
                 "CROWDSEC_INDICATOR_CREATE_FROM",
                 ["crowdsec", "indicator_create_from"],
-                config,
+                self.config,
                 default="",
             )
         )
@@ -51,7 +51,7 @@ class CrowdSecConnector:
         self.attack_pattern_create_from_mitre = get_config_variable(
             "CROWDSEC_ATTACK_PATTERN_CREATE_FROM_MITRE",
             ["crowdsec", "attack_pattern_create_from_mitre"],
-            config,
+            self.config,
             default=False,
         )
 
@@ -69,7 +69,7 @@ class CrowdSecConnector:
             url=self.api_base_url,
             api_key=self.crowdsec_cti_key,
         )
-        self.builder = CrowdSecBuilder(self.helper, config)
+        self.builder = None
 
     def enrich_observable(self, observable: dict, stix_observable: dict):
         self.helper.metric.inc("run_count")
@@ -81,8 +81,6 @@ class CrowdSecConnector:
             for objectMarking in observable["objectMarking"]
         ]
         indicator = None
-        # Initialize bundle with observable
-        self.builder.add_to_bundle([stix_observable])
         # Retrieve CrowdSec CTI data for IP
         try:
             cti_data: Dict[str, Any] = self.client.get_crowdsec_cti_for_ip(ip)
@@ -92,6 +90,13 @@ class CrowdSecConnector:
         if not cti_data:
             return
 
+        # Retrieve specific data from CTI
+        reputation = cti_data.get("reputation", "")
+        mitre_techniques = cti_data.get("mitre_techniques", [])
+        cves = cti_data.get("cves", [])
+
+        # Initialize builder
+        self.builder = CrowdSecBuilder(self.helper, self.config, cti_data)
         # Add CTI url as external reference to observable
         cti_external_reference = self.builder.add_external_reference_to_target(
             target=stix_observable,
@@ -101,31 +106,11 @@ class CrowdSecConnector:
         )
         # Initialize external reference for sightings
         sighting_ext_refs = [cti_external_reference]
-        # Parse data from CTI response
-        behaviors = cti_data.get("behaviors", [])
-        references = cti_data.get("references", [])
-        mitre_techniques = cti_data.get("mitre_techniques", [])
-        attack_details = cti_data.get("attack_details", [])
-        cves = cti_data.get("cves", [])
-        reputation = cti_data.get("reputation", "")
-        confidence = cti_data.get("confidence", "")
-        first_seen = cti_data.get("history", {}).get("first_seen", "")
-        last_seen = cti_data.get("history", {}).get("last_seen", "")
-        target_countries = cti_data.get("target_countries", {})
-        origin_country = cti_data.get("location", {}).get("country", "")
-        origin_city = cti_data.get("location", {}).get("city", "")
-
         # Handle labels
-        self.builder.handle_labels(
-            reputation=reputation,
-            cves=cves,
-            behaviors=behaviors,
-            attack_details=attack_details,
-            mitre_techniques=mitre_techniques,
-            observable_id=observable_id,
-        )
-
+        self.builder.handle_labels(observable_id=observable_id)
         # Start Bundle creation
+        # Initialize bundle with observable
+        self.builder.add_to_bundle([stix_observable])
         # Handle reputation
         if reputation in self.indicator_create_from:
             pattern = f"[ipv4-addr:value = '{ip}']"
@@ -136,9 +121,6 @@ class CrowdSecConnector:
                 pattern,
                 observable_markings,
                 reputation,
-                confidence,
-                last_seen,
-                references,
             )
         # Handle mitre_techniques
         attack_patterns = []
@@ -165,28 +147,18 @@ class CrowdSecConnector:
         # Handle target countries
         if attack_patterns:
             self.builder.handle_target_countries(
-                target_countries, attack_patterns, observable_markings
+                attack_patterns, observable_markings
             )
         # Add note
         self.builder.add_note(
             observable_id=observable_id,
             ip=ip,
             reputation=reputation,
-            confidence=confidence,
-            first_seen=first_seen,
-            last_seen=last_seen,
-            origin_country=origin_country,
-            origin_city=origin_city,
-            behaviors=behaviors,
-            target_countries=target_countries,
             observable_markings=observable_markings,
         )
         # Create sightings relationship between CrowdSec organisation and observable
         self.builder.add_sighting(
             observable_id=observable_id,
-            first_seen=first_seen,
-            last_seen=last_seen,
-            confidence=confidence,
             observable_markings=observable_markings,
             sighting_ext_refs=sighting_ext_refs,
             indicator=indicator if indicator else None,

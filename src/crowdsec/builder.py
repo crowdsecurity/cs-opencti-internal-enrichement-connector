@@ -43,7 +43,7 @@ class CrowdSecBuilder:
 
     helper: OpenCTIConnectorHelper
 
-    def __init__(self, helper: OpenCTIConnectorHelper, config) -> None:
+    def __init__(self, helper: OpenCTIConnectorHelper, config, cti_data) -> None:
         self.helper = helper
         self.crowdsec_ent_name = clean_config(
             get_config_variable("CROWDSEC_NAME", ["crowdsec", "name"], config)
@@ -156,6 +156,20 @@ class CrowdSecBuilder:
             )
         )
 
+        # Parse data from CTI response
+        self.behaviors = cti_data.get("behaviors", [])
+        self.references = cti_data.get("references", [])
+        self.mitre_techniques = cti_data.get("mitre_techniques", [])
+        self.attack_details = cti_data.get("attack_details", [])
+        self.cves = cti_data.get("cves", [])
+        self.reputation = cti_data.get("reputation", "")
+        self.confidence = cti_data.get("confidence", "")
+        self.first_seen = cti_data.get("history", {}).get("first_seen", "")
+        self.last_seen = cti_data.get("history", {}).get("last_seen", "")
+        self.target_countries = cti_data.get("target_countries", {})
+        self.origin_country = cti_data.get("location", {}).get("country", "")
+        self.origin_city = cti_data.get("location", {}).get("city", "")
+
     def add_to_bundle(self, objects: List) -> List[object]:
         for obj in objects:
             self.bundle_objects.append(obj)
@@ -207,9 +221,6 @@ class CrowdSecBuilder:
         pattern: str,
         observable_markings: List,
         reputation: str,
-        confidence: str,
-        last_seen: str,
-        references: List,
     ) -> Indicator:
         indicator = Indicator(
             id=self.helper.api.indicator.generate_id(pattern),
@@ -219,10 +230,10 @@ class CrowdSecBuilder:
             pattern=pattern,
             pattern_type="stix",
             #  We do not use first_seen as OpenCTI will add some duration to define valid_until
-            valid_from=self.helper.api.stix2.format_date(last_seen),
-            confidence=_get_confidence_level(confidence),
+            valid_from=self.helper.api.stix2.format_date(self.last_seen),
+            confidence=_get_confidence_level(self.confidence),
             object_marking_refs=observable_markings,
-            external_references=self._handle_blocklist_references(references),
+            external_references=self._handle_blocklist_references(self.references),
             indicator_types=(
                 ["malicious-activity"] if reputation == "malicious" else []
             ),
@@ -290,27 +301,20 @@ class CrowdSecBuilder:
         observable_id: str,
         ip: str,
         reputation: str,
-        confidence: str,
-        first_seen: str,
-        last_seen: str,
-        origin_country: str,
-        origin_city: str,
-        behaviors: List,
-        target_countries: Dict,
         observable_markings: List,
     ) -> None:
         if reputation == "unknown":
             content = f"This is was not found in CrowdSec CTI. \n\n"
         else:
-            content = f"**Reputation**: {reputation} \n\n"
-            content += f"**Confidence**: {confidence} \n\n"
-            content += f"**First Seen**: {first_seen} \n\n"
-            content += f"**Last Seen**: {last_seen} \n\n"
-            if origin_country and origin_city:
-                content += f"**Origin**: {origin_country} ({origin_city}) \n\n"
-            if behaviors:
+            content = f"**Reputation**: {self.reputation} \n\n"
+            content += f"**Confidence**: {self.confidence} \n\n"
+            content += f"**First Seen**: {self.first_seen} \n\n"
+            content += f"**Last Seen**: {self.last_seen} \n\n"
+            if self.origin_country and self.origin_city:
+                content += f"**Origin**: {self.origin_country} ({self.origin_city}) \n\n"
+            if self.behaviors:
                 content += f"**Behaviors**: \n\n"
-                for behavior in behaviors:
+                for behavior in self.behaviors:
                     content += (
                         "- "
                         + behavior["label"]
@@ -319,9 +323,9 @@ class CrowdSecBuilder:
                         + "\n\n"
                     )
 
-            if target_countries:
+            if self.target_countries:
                 content += f"**Most targeted countries**: \n\n"
-                for country_alpha_2, val in target_countries.items():
+                for country_alpha_2, val in self.target_countries.items():
                     country_info = pycountry.countries.get(alpha_2=country_alpha_2)
                     content += "- " + country_info.name + f" ({val}%)" + "\n\n"
 
@@ -345,9 +349,6 @@ class CrowdSecBuilder:
     def add_sighting(
         self,
         observable_id: str,
-        first_seen: str,
-        last_seen: str,
-        confidence: str,
         observable_markings: List,
         sighting_ext_refs: List,
         indicator: Indicator,
@@ -358,13 +359,13 @@ class CrowdSecBuilder:
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
             description=self.crowdsec_ent_desc,
             first_seen=(
-                parse(first_seen).strftime("%Y-%m-%dT%H:%M:%SZ") if first_seen else None
+                parse(self.first_seen).strftime("%Y-%m-%dT%H:%M:%SZ") if self.first_seen else None
             ),
             last_seen=(
-                parse(last_seen).strftime("%Y-%m-%dT%H:%M:%SZ") if last_seen else None
+                parse(self.last_seen).strftime("%Y-%m-%dT%H:%M:%SZ") if self.last_seen else None
             ),
             count=1,
-            confidence=_get_confidence_level(confidence),
+            confidence=_get_confidence_level(self.confidence),
             object_marking_refs=observable_markings,
             external_references=sighting_ext_refs,
             sighting_of_ref=indicator.id if indicator else fake_indicator_id,
@@ -437,11 +438,6 @@ class CrowdSecBuilder:
     def handle_labels(
         self,
         observable_id: str,
-        reputation: str,
-        cves: List,
-        behaviors: List,
-        attack_details: List,
-        mitre_techniques: List,
     ) -> None:
         # Initialize labels and label colors
         labels = []
@@ -451,28 +447,28 @@ class CrowdSecBuilder:
         labels_behavior_color = self.labels_behavior_color
         # Mitre techniques
         if self.labels_mitre_use:
-            for mitre_technique in mitre_techniques:
+            for mitre_technique in self.mitre_techniques:
                 labels.append((mitre_technique["name"], labels_mitre_color))
         # CVEs
         if self.labels_cve_use:
-            for cve in cves:
+            for cve in self.cves:
                 labels.append((cve.upper(), labels_cve_color))
         # Behaviors
         if self.labels_behavior_use:
-            for behavior in behaviors:
+            for behavior in self.behaviors:
                 labels.append((behavior["name"], labels_behavior_color))
         # Reputation
-        if reputation and self.labels_reputation_use:
-            color_attribute = f"labels_reputation_{reputation}_color"
+        if self.reputation and self.labels_reputation_use:
+            color_attribute = f"labels_reputation_{self.reputation}_color"
             color = getattr(self, color_attribute, None)
-            if reputation != "unknown" and color is not None:
-                labels.append((reputation, color))
+            if self.reputation != "unknown" and color is not None:
+                labels.append((self.reputation, color))
         # Scenarios labels
         if self.labels_scenario_use:
             # We handle CVE labels separately to avoid duplicates
             filtered_scenarios = [
                 scenario
-                for scenario in attack_details
+                for scenario in self.attack_details
                 if not CVE_REGEX.search(scenario["name"])
             ]
             scenario_names = [
@@ -497,11 +493,10 @@ class CrowdSecBuilder:
 
     def handle_target_countries(
         self,
-        target_countries: Dict,
         attack_patterns: List[str],
         observable_markings: List,
     ) -> None:
-        for country_alpha_2, val in target_countries.items():
+        for country_alpha_2, val in self.target_countries.items():
             country_info = pycountry.countries.get(alpha_2=country_alpha_2)
 
             country = Location(
