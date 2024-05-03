@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """CrowdSec internal enrichment module."""
 import os
-from re import sub
 from pathlib import Path
 from typing import Dict, Any
 from urllib.parse import urljoin
@@ -12,6 +11,7 @@ from pycti import OpenCTIConnectorHelper, get_config_variable
 from .builder import CrowdSecBuilder
 from .client import CrowdSecClient, QuotaExceedException
 from .constants import CTI_URL
+from .helper import clean_config
 
 
 class CrowdSecConnector:
@@ -27,26 +27,26 @@ class CrowdSecConnector:
             else {}
         )
         self.helper = OpenCTIConnectorHelper(config)
-        self.crowdsec_cti_key = get_config_variable(
-            "CROWDSEC_KEY", ["crowdsec", "key"], config
+        self.crowdsec_cti_key = clean_config(
+            get_config_variable("CROWDSEC_KEY", ["crowdsec", "key"], config)
         )
-        self.crowdsec_api_version = get_config_variable(
-            "CROWDSEC_VERSION", ["crowdsec", "api_version"], config
-        )
-
-        self.max_tlp = get_config_variable(
-            "CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], config
-        )
-        raw_indicator_create_from = get_config_variable(
-            "CROWDSEC_INDICATOR_CREATE_FROM",
-            ["crowdsec", "indicator_create_from"],
-            config,
-            default="",
+        self.crowdsec_api_version = clean_config(
+            get_config_variable("CROWDSEC_VERSION", ["crowdsec", "api_version"], config)
         )
 
-        self.indicator_create_from = sub(r"[\"']", "", raw_indicator_create_from).split(
-            ","
+        self.max_tlp = clean_config(
+            get_config_variable("CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], config)
         )
+        raw_indicator_create_from = clean_config(
+            get_config_variable(
+                "CROWDSEC_INDICATOR_CREATE_FROM",
+                ["crowdsec", "indicator_create_from"],
+                config,
+                default="",
+            )
+        )
+
+        self.indicator_create_from = raw_indicator_create_from.split(",")
 
         self.attack_pattern_create_from_mitre = get_config_variable(
             "CROWDSEC_ATTACK_PATTERN_CREATE_FROM_MITRE",
