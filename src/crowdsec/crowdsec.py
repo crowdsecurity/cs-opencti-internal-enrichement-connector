@@ -31,11 +31,15 @@ class CrowdSecConnector:
             get_config_variable("CROWDSEC_KEY", ["crowdsec", "key"], self.config)
         )
         self.crowdsec_api_version = clean_config(
-            get_config_variable("CROWDSEC_VERSION", ["crowdsec", "api_version"], self.config)
+            get_config_variable(
+                "CROWDSEC_VERSION", ["crowdsec", "api_version"], self.config
+            )
         )
 
         self.max_tlp = clean_config(
-            get_config_variable("CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], self.config)
+            get_config_variable(
+                "CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], self.config
+            )
         )
         raw_indicator_create_from = clean_config(
             get_config_variable(
@@ -146,9 +150,7 @@ class CrowdSecConnector:
             )
         # Handle target countries
         if attack_patterns:
-            self.builder.handle_target_countries(
-                attack_patterns, observable_markings
-            )
+            self.builder.handle_target_countries(attack_patterns, observable_markings)
         # Add note
         self.builder.add_note(
             observable_id=observable_id,

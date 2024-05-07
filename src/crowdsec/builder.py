@@ -11,6 +11,7 @@ from pycti import (
     StixCoreRelationship,
     OpenCTIStix2,
     STIX_EXT_OCTI_SCO,
+    StixSightingRelationship,
 )
 from stix2 import (
     Relationship,
@@ -239,7 +240,7 @@ class CrowdSecBuilder:
             ),
             custom_properties={
                 "x_opencti_main_observable_type": stix_observable["x_opencti_type"],
-            }
+            },
         )
 
         relationship = Relationship(
@@ -311,7 +312,9 @@ class CrowdSecBuilder:
             content += f"**First Seen**: {self.first_seen} \n\n"
             content += f"**Last Seen**: {self.last_seen} \n\n"
             if self.origin_country and self.origin_city:
-                content += f"**Origin**: {self.origin_country} ({self.origin_city}) \n\n"
+                content += (
+                    f"**Origin**: {self.origin_country} ({self.origin_city}) \n\n"
+                )
             if self.behaviors:
                 content += f"**Behaviors**: \n\n"
                 for behavior in self.behaviors:
@@ -355,15 +358,27 @@ class CrowdSecBuilder:
     ) -> None:
 
         fake_indicator_id = "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8"
+        first_seen = (
+            parse(self.first_seen).strftime("%Y-%m-%dT%H:%M:%SZ")
+            if self.first_seen
+            else None
+        )
+        last_seen = (
+            parse(self.last_seen).strftime("%Y-%m-%dT%H:%M:%SZ")
+            if self.last_seen
+            else None
+        )
         sighting = Sighting(
+            id=StixSightingRelationship.generate_id(
+                self.get_or_create_crowdsec_ent()["standard_id"],
+                observable_id,
+                first_seen,
+                last_seen,
+            ),
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
             description=self.crowdsec_ent_desc,
-            first_seen=(
-                parse(self.first_seen).strftime("%Y-%m-%dT%H:%M:%SZ") if self.first_seen else None
-            ),
-            last_seen=(
-                parse(self.last_seen).strftime("%Y-%m-%dT%H:%M:%SZ") if self.last_seen else None
-            ),
+            first_seen=first_seen,
+            last_seen=last_seen,
             count=1,
             confidence=_get_confidence_level(self.confidence),
             object_marking_refs=observable_markings,
