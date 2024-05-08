@@ -185,11 +185,7 @@ class CrowdSecBuilder:
             "url": url,
             "description": description,
         }
-        # We have to create the external reference in database as creating the object only may lead to data loss
-        # Without this workaround, if we delete the external reference in OpenCTI UI,
-        # it won't be re-created on next enrichment
-        # @TODO: find a better way to handle this
-        self.helper.api.external_reference.create(**ext_ref_dict)
+        self._add_external_ref_to_database(ext_ref_dict)
 
         OpenCTIStix2.put_attribute_in_extension(
             target,
@@ -421,6 +417,14 @@ class CrowdSecBuilder:
 
         return vulnerability
 
+    def _add_external_ref_to_database(self, ext_ref_dict: Dict) -> None:
+        """
+        We have to create the external reference in database as creating the object only may lead to data loss
+        Without this, if we delete the external reference in OpenCTI UI, it won't be re-created on next enrichment
+        @TODO: find a better way to handle this
+        """
+        self.helper.api.external_reference.create(**ext_ref_dict)
+
     def _handle_blocklist_references(self, references: List) -> List[Dict]:
         blocklist_references = []
         for reference in references:
@@ -435,11 +439,7 @@ class CrowdSecBuilder:
                     "url": first_url,
                     "description": reference["description"],
                 }
-                # We have to create the external reference in database as creating the object only may lead to data loss
-                # Without this workaround, if we delete the external reference in OpenCTI UI,
-                # it won't be re-created on next enrichment
-                # @TODO: find a better way to handle this
-                self.helper.api.external_reference.create(**ext_ref_dict)
+                self._add_external_ref_to_database(ext_ref_dict)
                 blocklist_references.append(ext_ref_dict)
 
         return blocklist_references
@@ -452,7 +452,7 @@ class CrowdSecBuilder:
             "url": f"{MITRE_URL}{mitre_technique['name']}",
             "description": description,
         }
-        self.helper.api.external_reference.create(**ext_ref_dict)
+        self._add_external_ref_to_database(ext_ref_dict)
 
         return ext_ref_dict
 
