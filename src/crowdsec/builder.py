@@ -508,9 +508,11 @@ class CrowdSecBuilder:
             label = self.helper.api.label.read_or_create_unchecked(
                 value=value, color=color
             )
-            self.helper.api.stix_cyber_observable.add_label(
-                id=observable_id, label_id=label["id"]
-            )
+            # If the user has no rights to create the label, label is None
+            if label is not None:
+                self.helper.api.stix_cyber_observable.add_label(
+                    id=observable_id, label_id=label["id"]
+                )
 
     def handle_target_countries(
             self,
