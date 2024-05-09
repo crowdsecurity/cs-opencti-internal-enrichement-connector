@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      EXTENSION_ZIP_NAME: "crowdsec-opencti-internal-enrichment-connector"
 
     steps:
       - name: Check naming convention
@@ -33,12 +35,19 @@ jobs:
         run: |
           echo "VERSION_NUMBER=$(echo ${{ github.event.inputs.tag_name }} | sed 's/v//g' )" >> $GITHUB_ENV
 
+      - name: Set version sources
+        run: |
+          echo "VERSION_SOURCES=$(echo ${{ env.EXTENSION_ZIP_NAME }}-${{ env.VERSION_NUMBER }} )" >> $GITHUB_ENV    
+
       - name: Clone sources
         uses: actions/checkout@v4
+        with:
+          path: ${{ env.VERSION_SOURCES }}
 
       - name: Check version ${{ env.VERSION_NUMBER }} consistency in files
         # CHANGELOG.md, src/crowdsec.py
         run: |
+          cd ${{ env.VERSION_SOURCES }}
           # Check top ## [VERSION_NUMBER](GITHUB_URL/releases/tag/vVERSION_NUMBER) - yyyy-mm-dd in CHANGELOG.md
           # Example: ## [0.0.2](https://github.com/crowdsecurity/python-capi-sdk/releases/tag/v0.0.2) - 2024-02-07
           CURRENT_DATE=$(date +'%Y-%m-%d')
@@ -79,7 +88,10 @@ jobs:
               echo $UA_VERSION 
               exit 1
           fi
-          
+
+      - name: Create zip for OpenCTI pull request
+        run: |
+          zip -r ${{ env.VERSION_SOURCES }}.zip ${{ env.VERSION_SOURCES }}/ -x '${{ env.VERSION_SOURCES }}/.git*'    
 
       - name: Create Tag ${{ github.event.inputs.tag_name }}
         uses: actions/github-script@v7
@@ -102,6 +114,7 @@ jobs:
       - name: Create release ${{ env.VERSION_NUMBER }}
         uses: softprops/action-gh-release@v2
         with:
+          files: ${{ env.VERSION_SOURCES }}.zip
           body_path: CHANGELOG.txt
           name: ${{ env.VERSION_NUMBER }}
           tag_name: ${{ github.event.inputs.tag_name }}
