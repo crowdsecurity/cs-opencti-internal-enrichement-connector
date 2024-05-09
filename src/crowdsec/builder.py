@@ -47,11 +47,16 @@ class CrowdSecBuilder:
     def __init__(self, helper: OpenCTIConnectorHelper, config, cti_data) -> None:
         self.helper = helper
         self.crowdsec_ent_name = clean_config(
-            get_config_variable("CROWDSEC_NAME", ["crowdsec", "name"], config)
+            get_config_variable(
+                "CROWDSEC_NAME", ["crowdsec", "name"], config, default="CrowdSec"
+            )
         )
         self.crowdsec_ent_desc = clean_config(
             get_config_variable(
-                "CROWDSEC_DESCRIPTION", ["crowdsec", "description"], config
+                "CROWDSEC_DESCRIPTION",
+                ["crowdsec", "description"],
+                config,
+                default="CrowdSec CTI enrichment",
             )
         )
         self.crowdsec_ent = None
@@ -179,7 +184,6 @@ class CrowdSecBuilder:
     def add_external_reference_to_target(
             self, target: object, source_name: str, url: str, description: str
     ) -> Dict:
-
         ext_ref_dict = {
             "source_name": source_name,
             "url": url,
@@ -262,7 +266,6 @@ class CrowdSecBuilder:
     def add_attack_pattern_for_mitre(
             self, mitre_technique, observable_markings, indicator, external_references
     ) -> AttackPattern:
-
         description = f"{mitre_technique['label']}: {mitre_technique['description']}"
         name = f"MITRE ATT&CK ({mitre_technique['name']} - {mitre_technique['label']})"
 
@@ -355,7 +358,6 @@ class CrowdSecBuilder:
             sighting_ext_refs: List,
             indicator: Indicator,
     ) -> None:
-
         fake_indicator_id = "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8"
         first_seen = (
             parse(self.first_seen).strftime("%Y-%m-%dT%H:%M:%SZ")

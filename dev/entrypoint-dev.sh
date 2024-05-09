@@ -3,7 +3,7 @@
 # Correct working directory
 cd /opt/opencti-crowdsec
 
-pip3 install --no-cache-dir -r requirements.txt
+pip3 install --no-cache-dir -r requirements-dev.txt
 
 # Idle indefinitely
 while true; do

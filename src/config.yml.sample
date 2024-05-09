@@ -1,35 +1,37 @@
 opencti:
-  url: 'http://localhost:8080'
-  token: 'ChangeMe'
+  url: 'http://opencti:8080' # # default OpenCTI API URL
+  token: 'ChangeMe' # Add OpenCTI API token here
 
 connector:
-  id: 'ChangeMe'
+  id: 'ChangeMe' # Add connector ID (any valid UUID v4)
   type: 'INTERNAL_ENRICHMENT'
-  name: 'CrowdSec'
+  name: 'CrowdSec' # Connector name that will be displayed in OpenCTI
   scope: 'IPv4-Addr' # MIME type or SCO
-  confidence_level: 80 # From 0 (Unknown) to 100 (Fully trusted)
-  log_level: 'info'
-  auto: true
+  confidence_level: 100 # From 0 (Unknown) to 100 (Fully trusted)
+  log_level: 'error' # Log level (debug, info, warn, error)
+  auto: true # Enable/disable auto-enrichment of observables
 
 crowdsec:
   key: 'ChangeMe'
-  api_version: v2
-  name: 'CrowdSec'
-  description: 'CrowdSec CTI'
-  max_tlp: 'TLP:AMBER'
-  labels_scenario_use: true
-  labels_scenario_only_name: false
-  labels_scenario_color: '#2E2A14'
-  labels_cve_use: true
-  labels_cve_color: '#800080'
-  labels_mitre_use: false
-  labels_mitre_color: '#000080'
-  labels_behavior_use: false
-  labels_behavior_color: '#808000'
-  labels_reputation_use: false
-  labels_reputation_malicious_color: '#FF0000'
-  labels_reputation_suspicious_color: '#FFA500'
-  labels_reputation_safe_color': '#00BFFF'
-  labels_reputation_known_color: '#808080'
-  indicator_create_from: ''
-  attack_pattern_create_from_mitre: true
+  api_version: v2 # v2 is the only supported version for now
+  name: 'CrowdSec' # Name of CrowdSec organisation in OpenCTI
+  description: 'CrowdSec CTI enrichment' # Description of CrowdSec organisation in OpenCTI
+  max_tlp: 'TLP:AMBER' # Max TLP level for observable enrichment
+  labels_scenario_use: true # Enable/disable scenario labels
+  labels_scenario_only_name: true # Use only scenario name as label
+  labels_scenario_color: '#2E2A14' # Color of scenario label
+  labels_cve_use: true # Enable/disable CVE labels
+  labels_cve_color: '#800080' # Color of CVE label
+  labels_mitre_use: false # Enable/disable MITRE labels
+  labels_mitre_color: '#000080' # Color of MITRE label
+  labels_behavior_use: false # Enable/disable behavior labels
+  labels_behavior_color: '#808000' # Color of behavior label
+  labels_reputation_use: false # Enable/disable reputation labels
+  labels_reputation_malicious_color: '#FF0000' # Color of malicious reputation label
+  labels_reputation_suspicious_color: '#FFA500' # Color of suspicious reputation label
+  labels_reputation_safe_color': '#00BFFF' # Color of safe reputation label
+  labels_reputation_known_color: '#808080' # Color of known reputation label
+  indicator_create_from: '' # List of reputations to create indicators from (malicious, suspicious, known, safe) separated by comma
+  attack_pattern_create_from_mitre: true # Enable/disable creation of attack patterns from MITRE techniques
+  create_note: true # Enable/disable creation of note in observable for each enrichment
+  create_sighting: true # Enable/disable creation of sighting for each enrichment

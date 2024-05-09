@@ -1,10 +1,10 @@
 services:
   connector-crowdsec:
     build:
-      context: ../crowdsec-opencti-internal-enrichment-connector/dev
+      context: ../cs-opencti-internal-enrichment-connector/dev
       dockerfile: Dockerfile-dev
     volumes:
-      - ../crowdsec-opencti-internal-enrichment-connector/src:/opt/opencti-crowdsec
+      - ../cs-opencti-internal-enrichment-connector/src:/opt/opencti-crowdsec
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -13,7 +13,7 @@ services:
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
       - CONNECTOR_NAME=CrowdSec
       - CROWDSEC_NAME=CrowdSec
-      - CROWDSEC_DESCRIPTION=crowdsec_cti_enrichment
+      - CROWDSEC_DESCRIPTION='CrowdSec CTI enrichment'
       - CONNECTOR_SCOPE=IPv4-Addr # MIME type or Stix Object
       - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
       - CONNECTOR_LOG_LEVEL=debug

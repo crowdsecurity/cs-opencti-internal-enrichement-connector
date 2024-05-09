@@ -15,7 +15,6 @@ from .helper import clean_config
 
 
 class CrowdSecConnector:
-
     def __init__(self):
         # Instantiate the connector helper from config
         self.crowdsec_ent = None
@@ -32,13 +31,19 @@ class CrowdSecConnector:
         )
         self.crowdsec_api_version = clean_config(
             get_config_variable(
-                "CROWDSEC_VERSION", ["crowdsec", "api_version"], self.config
+                "CROWDSEC_VERSION",
+                ["crowdsec", "api_version"],
+                self.config,
+                default="v2",
             )
         )
 
         self.max_tlp = clean_config(
             get_config_variable(
-                "CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], self.config
+                "CROWDSEC_MAX_TLP",
+                ["crowdsec", "max_tlp"],
+                self.config,
+                default="TLP:AMBER",
             )
         )
         raw_indicator_create_from = clean_config(
@@ -57,6 +62,20 @@ class CrowdSecConnector:
             ["crowdsec", "attack_pattern_create_from_mitre"],
             self.config,
             default=False,
+        )
+
+        self.create_note = get_config_variable(
+            "CROWDSEC_CREATE_NOTE",
+            ["crowdsec", "create_note"],
+            self.config,
+            default=False,
+        )
+
+        self.create_sighting = get_config_variable(
+            "CROWDSEC_CREATE_SIGHTING",
+            ["crowdsec", "create_sighting"],
+            self.config,
+            default=True,
         )
 
         if self.crowdsec_api_version != "v2":
@@ -152,19 +171,21 @@ class CrowdSecConnector:
         if attack_patterns:
             self.builder.handle_target_countries(attack_patterns, observable_markings)
         # Add note
-        self.builder.add_note(
-            observable_id=observable_id,
-            ip=ip,
-            reputation=reputation,
-            observable_markings=observable_markings,
-        )
+        if self.create_note:
+            self.builder.add_note(
+                observable_id=observable_id,
+                ip=ip,
+                reputation=reputation,
+                observable_markings=observable_markings,
+            )
         # Create sightings relationship between CrowdSec organisation and observable
-        self.builder.add_sighting(
-            observable_id=observable_id,
-            observable_markings=observable_markings,
-            sighting_ext_refs=sighting_ext_refs,
-            indicator=indicator if indicator else None,
-        )
+        if self.create_sighting:
+            self.builder.add_sighting(
+                observable_id=observable_id,
+                observable_markings=observable_markings,
+                sighting_ext_refs=sighting_ext_refs,
+                indicator=indicator if indicator else None,
+            )
         # End of Bundle creation
         # Send Bundle to OpenCTI workers
         self.builder.send_bundle()
@@ -173,7 +194,6 @@ class CrowdSecConnector:
         return f"CrowdSec enrichment completed for {ip}"
 
     def _process_message(self, data: Dict):
-
         observable = data["enrichment_entity"]
         stix_observable = data["stix_entity"]
 
