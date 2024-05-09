@@ -182,7 +182,7 @@ class CrowdSecBuilder:
         return self.bundle_objects
 
     def add_external_reference_to_target(
-            self, target: object, source_name: str, url: str, description: str
+        self, target: object, source_name: str, url: str, description: str
     ) -> Dict:
         ext_ref_dict = {
             "source_name": source_name,
@@ -218,13 +218,13 @@ class CrowdSecBuilder:
         return self.crowdsec_ent
 
     def add_indicator_based_on(
-            self,
-            observable_id: str,
-            stix_observable: dict,
-            ip: str,
-            pattern: str,
-            observable_markings: List,
-            reputation: str,
+        self,
+        observable_id: str,
+        stix_observable: dict,
+        ip: str,
+        pattern: str,
+        observable_markings: List,
+        reputation: str,
     ) -> Indicator:
         indicator = Indicator(
             id=self.helper.api.indicator.generate_id(pattern),
@@ -264,7 +264,7 @@ class CrowdSecBuilder:
         return indicator
 
     def add_attack_pattern_for_mitre(
-            self, mitre_technique, observable_markings, indicator, external_references
+        self, mitre_technique, observable_markings, indicator, external_references
     ) -> AttackPattern:
         description = f"{mitre_technique['label']}: {mitre_technique['description']}"
         name = f"MITRE ATT&CK ({mitre_technique['name']} - {mitre_technique['label']})"
@@ -300,11 +300,11 @@ class CrowdSecBuilder:
         return attack_pattern
 
     def add_note(
-            self,
-            observable_id: str,
-            ip: str,
-            reputation: str,
-            observable_markings: List,
+        self,
+        observable_id: str,
+        ip: str,
+        reputation: str,
+        observable_markings: List,
     ) -> None:
         if reputation == "unknown":
             content = f"This is was not found in CrowdSec CTI. \n\n"
@@ -321,11 +321,11 @@ class CrowdSecBuilder:
                 content += f"**Behaviors**: \n\n"
                 for behavior in self.behaviors:
                     content += (
-                            "- "
-                            + behavior["label"]
-                            + ": "
-                            + behavior["description"]
-                            + "\n\n"
+                        "- "
+                        + behavior["label"]
+                        + ": "
+                        + behavior["description"]
+                        + "\n\n"
                     )
 
             if self.target_countries:
@@ -352,11 +352,11 @@ class CrowdSecBuilder:
         self.add_to_bundle([note])
 
     def add_sighting(
-            self,
-            observable_id: str,
-            observable_markings: List,
-            sighting_ext_refs: List,
-            indicator: Indicator,
+        self,
+        observable_id: str,
+        observable_markings: List,
+        sighting_ext_refs: List,
+        indicator: Indicator,
     ) -> None:
         fake_indicator_id = "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8"
         first_seen = (
@@ -392,7 +392,7 @@ class CrowdSecBuilder:
         self.add_to_bundle([sighting])
 
     def add_vulnerability_from_cve(
-            self, cve: str, observable_markings: List, observable_id: str
+        self, cve: str, observable_markings: List, observable_id: str
     ) -> Vulnerability:
         cve_name = cve.upper()
         vulnerability = Vulnerability(
@@ -431,9 +431,9 @@ class CrowdSecBuilder:
         blocklist_references = []
         for reference in references:
             if (
-                    reference.get("references")
-                    and isinstance(reference["references"], list)
-                    and reference["references"][0].startswith("http")
+                reference.get("references")
+                and isinstance(reference["references"], list)
+                and reference["references"][0].startswith("http")
             ):
                 first_url = reference["references"][0]
                 ext_ref_dict = {
@@ -459,8 +459,8 @@ class CrowdSecBuilder:
         return ext_ref_dict
 
     def handle_labels(
-            self,
-            observable_id: str,
+        self,
+        observable_id: str,
     ) -> None:
         # Initialize labels and label colors
         labels = []
@@ -517,9 +517,9 @@ class CrowdSecBuilder:
                 )
 
     def handle_target_countries(
-            self,
-            attack_patterns: List[str],
-            observable_markings: List,
+        self,
+        attack_patterns: List[str],
+        observable_markings: List,
     ) -> None:
         for country_alpha_2, val in self.target_countries.items():
             country_info = pycountry.countries.get(alpha_2=country_alpha_2)
