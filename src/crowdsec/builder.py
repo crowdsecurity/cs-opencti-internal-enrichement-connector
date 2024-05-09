@@ -44,7 +44,9 @@ class CrowdSecBuilder:
 
     helper: OpenCTIConnectorHelper
 
-    def __init__(self, helper: OpenCTIConnectorHelper, config: Dict, cti_data: Dict) -> None:
+    def __init__(
+        self, helper: OpenCTIConnectorHelper, config: Dict, cti_data: Dict
+    ) -> None:
         self.helper = helper
         self.crowdsec_ent_name = clean_config(
             get_config_variable(

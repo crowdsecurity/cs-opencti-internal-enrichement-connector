@@ -22,6 +22,13 @@ class CrowdSecBuilderTest(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         cls.helper = MagicMock()
+        cls.helper.api.indicator.generate_id.return_value = (
+            "indicator--94c598e8-9174-58e0-9731-316e18f26916"
+        )
+        cls.helper.api.stix_domain_object.get_by_stix_id_or_name.return_value = {
+            "standard_id": "identity--5f18c204-0a7f-5061-a146-d29561d9c8aa"
+        }
+        cls.helper.api.stix2.format_date.return_value = datetime.datetime.utcnow()
         cls.cti_data = load_file("malicious_ip.json")
 
     def test_init_builder(self):
@@ -56,10 +63,16 @@ class CrowdSecBuilderTest(unittest.TestCase):
         self.assertEqual(builder.origin_country, "US")
         self.assertEqual(builder.behaviors, self.cti_data.get("behaviors", []))
         self.assertEqual(builder.references, self.cti_data.get("references", []))
-        self.assertEqual(builder.mitre_techniques, self.cti_data.get("mitre_techniques", []))
-        self.assertEqual(builder.attack_details, self.cti_data.get("attack_details", []))
+        self.assertEqual(
+            builder.mitre_techniques, self.cti_data.get("mitre_techniques", [])
+        )
+        self.assertEqual(
+            builder.attack_details, self.cti_data.get("attack_details", [])
+        )
         self.assertEqual(builder.cves, self.cti_data.get("cves", []))
-        self.assertEqual(builder.target_countries, self.cti_data.get("target_countries", {}))
+        self.assertEqual(
+            builder.target_countries, self.cti_data.get("target_countries", {})
+        )
 
     def test_add_to_bundle(self):
         builder = CrowdSecBuilder(
@@ -98,4 +111,48 @@ class CrowdSecBuilderTest(unittest.TestCase):
         )
 
         self.assertEqual(external_reference["source_name"], "CrowdSec CTI TEST")
-        self.assertEqual(stix_observable["extensions"], {"extension-definition--f93e2c80-4231-4f9a-af8b-95c9bd566a82": {"external_references": [external_reference]}})
+        self.assertEqual(
+            stix_observable["extensions"],
+            {
+                "extension-definition--f93e2c80-4231-4f9a-af8b-95c9bd566a82": {
+                    "external_references": [external_reference]
+                }
+            },
+        )
+
+    def test_add_indicator_based_on(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+
+        observable_id = load_file("observable.json")["standard_id"]
+        stix_observable = load_file("stix_observable.json")
+        reputation = "suspicious"
+
+        indicator = builder.add_indicator_based_on(
+            observable_id=observable_id,
+            stix_observable=stix_observable,
+            ip=stix_observable["value"],
+            pattern=f"[ipv4-addr:value = '{stix_observable['value']}']",
+            observable_markings=[],
+            reputation=reputation,
+        )
+        # Check indicator
+        self.assertEqual(indicator.get("pattern_type"), "stix")
+        self.assertEqual(indicator.get("confidence"), 90)  # high
+        expected_ext_ref = stix2.ExternalReference(
+            source_name="Firehol cybercrime tracker list",
+            description="CyberCrime, a project tracking command and control. "
+                        "This list contains command and control IP addresses.",
+            url="https://iplists.firehol.org/?ipset=cybercrime",
+        )
+        self.assertEqual(indicator.get("external_references"), [expected_ext_ref])
+        # Check bundle
+        self.assertEqual(len(builder.bundle_objects), 2)
+        self.assertEqual(builder.bundle_objects[0], indicator)
+        # Check relationship
+        relationship = builder.bundle_objects[1]
+        self.assertEqual(relationship["source_ref"], indicator["id"])
+        self.assertEqual(relationship["relationship_type"], "based-on")

@@ -104,6 +104,24 @@ docker-compose down -v
 
 
 
+## Unit tests
+
+First, prepare your virtual environment:
+
+```bash
+cd src
+source ./env/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements-dev.txt
+```
+
+Then, run tests: 
+
+```bash
+cd ../tests
+python -m pytest -v
+```
+
 
 
 
