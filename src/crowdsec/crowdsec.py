@@ -196,7 +196,6 @@ class CrowdSecConnector:
     def _process_message(self, data: Dict):
         observable = data["enrichment_entity"]
         stix_observable = data["stix_entity"]
-
         tlp = "TLP:WHITE"
         for marking_definition in observable["objectMarking"]:
             if marking_definition["definition_type"] == "TLP":

@@ -44,7 +44,7 @@ class CrowdSecBuilder:
 
     helper: OpenCTIConnectorHelper
 
-    def __init__(self, helper: OpenCTIConnectorHelper, config, cti_data) -> None:
+    def __init__(self, helper: OpenCTIConnectorHelper, config: Dict, cti_data: Dict) -> None:
         self.helper = helper
         self.crowdsec_ent_name = clean_config(
             get_config_variable(
@@ -183,7 +183,7 @@ class CrowdSecBuilder:
 
     def add_external_reference_to_target(
         self, target: object, source_name: str, url: str, description: str
-    ) -> Dict:
+    ) -> Dict[str, str]:
         ext_ref_dict = {
             "source_name": source_name,
             "url": url,
