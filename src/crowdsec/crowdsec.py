@@ -121,8 +121,8 @@ class CrowdSecConnector:
         # Initialize builder
         self.builder = CrowdSecBuilder(self.helper, self.config, cti_data)
         # Add CTI url as external reference to observable
-        cti_external_reference = self.builder.add_external_reference_to_target(
-            target=stix_observable,
+        cti_external_reference = self.builder.add_external_reference_to_observable(
+            stix_observable=stix_observable,
             source_name="CrowdSec CTI",
             url=urljoin(CTI_URL, ip),
             description="CrowdSec CTI url for this IP",

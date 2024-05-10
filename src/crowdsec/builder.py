@@ -9,8 +9,6 @@ from pycti import (
     OpenCTIConnectorHelper,
     get_config_variable,
     StixCoreRelationship,
-    OpenCTIStix2,
-    STIX_EXT_OCTI_SCO,
     StixSightingRelationship,
 )
 from stix2 import (
@@ -183,8 +181,8 @@ class CrowdSecBuilder:
             self.bundle_objects.append(obj)
         return self.bundle_objects
 
-    def add_external_reference_to_target(
-        self, target: object, source_name: str, url: str, description: str
+    def add_external_reference_to_observable(
+        self, stix_observable: Dict, source_name: str, url: str, description: str
     ) -> Dict[str, str]:
         ext_ref_dict = {
             "source_name": source_name,
@@ -193,13 +191,9 @@ class CrowdSecBuilder:
         }
         self._add_external_ref_to_database(ext_ref_dict)
 
-        OpenCTIStix2.put_attribute_in_extension(
-            target,
-            STIX_EXT_OCTI_SCO,
-            "external_references",
-            ext_ref_dict,
-            True,
-        )
+        if "external_references" not in stix_observable:
+            stix_observable["external_references"] = []
+        stix_observable["external_references"].append(ext_ref_dict)
 
         return ext_ref_dict
 
