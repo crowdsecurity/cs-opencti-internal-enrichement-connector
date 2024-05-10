@@ -94,7 +94,7 @@ class CrowdSecConnector:
         )
         self.builder = None
 
-    def enrich_observable(self, observable: dict, stix_observable: dict):
+    def enrich_observable(self, observable: Dict, stix_observable: Dict):
         self.helper.metric.inc("run_count")
         self.helper.metric.state("running")
         observable_id = observable["standard_id"]

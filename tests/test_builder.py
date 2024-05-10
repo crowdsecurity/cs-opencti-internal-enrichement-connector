@@ -28,6 +28,9 @@ class CrowdSecBuilderTest(unittest.TestCase):
         cls.helper.api.stix_domain_object.get_by_stix_id_or_name.return_value = {
             "standard_id": "identity--5f18c204-0a7f-5061-a146-d29561d9c8aa"
         }
+        cls.helper.api.attack_pattern.generate_id.return_value = (
+            "attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0"
+        )
         cls.helper.api.stix2.format_date.return_value = datetime.datetime.utcnow()
         cls.cti_data = load_file("malicious_ip.json")
 
@@ -95,7 +98,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         self.assertEqual(len(builder.bundle_objects), 2)
         self.assertEqual(builder.bundle_objects[1], other_observable)
 
-    def test_add_external_reference_to_target(self):
+    def test_add_external_reference_to_observable(self):
         builder = CrowdSecBuilder(
             helper=self.helper,
             config={},
@@ -103,8 +106,8 @@ class CrowdSecBuilderTest(unittest.TestCase):
         )
         stix_observable = load_file("stix_observable.json")
 
-        external_reference = builder.add_external_reference_to_target(
-            target=stix_observable,
+        external_reference = builder.add_external_reference_to_observable(
+            stix_observable=stix_observable,
             source_name="CrowdSec CTI TEST",
             url="https://crowdsec.net",
             description="CrowdSec CTI url for this IP",
@@ -112,12 +115,20 @@ class CrowdSecBuilderTest(unittest.TestCase):
 
         self.assertEqual(external_reference["source_name"], "CrowdSec CTI TEST")
         self.assertEqual(
-            stix_observable["extensions"],
-            {
-                "extension-definition--f93e2c80-4231-4f9a-af8b-95c9bd566a82": {
-                    "external_references": [external_reference]
-                }
-            },
+            stix_observable["external_references"],
+            [stix_observable["external_references"][0], external_reference],
+        )
+
+    def test_get_or_create_crowdsec_entity(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+        entity = builder.get_or_create_crowdsec_ent()
+        # Value is mocked on setup_class
+        self.assertEqual(
+            entity["standard_id"], "identity--5f18c204-0a7f-5061-a146-d29561d9c8aa"
         )
 
     def test_add_indicator_based_on(self):
@@ -145,7 +156,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         expected_ext_ref = stix2.ExternalReference(
             source_name="Firehol cybercrime tracker list",
             description="CyberCrime, a project tracking command and control. "
-                        "This list contains command and control IP addresses.",
+            "This list contains command and control IP addresses.",
             url="https://iplists.firehol.org/?ipset=cybercrime",
         )
         self.assertEqual(indicator.get("external_references"), [expected_ext_ref])
@@ -156,3 +167,73 @@ class CrowdSecBuilderTest(unittest.TestCase):
         relationship = builder.bundle_objects[1]
         self.assertEqual(relationship["source_ref"], indicator["id"])
         self.assertEqual(relationship["relationship_type"], "based-on")
+
+    def test_add_attack_pattern_for_mitre(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+
+        indicator = stix2.Indicator(
+            id="indicator--94c598e8-9174-58e0-9731-316e18f26916",
+            pattern="[ipv4-addr:value = '1.2.3.4']",
+            pattern_type="stix",
+            pattern_version="2.1",
+            valid_from=datetime.datetime.utcnow(),
+            created=datetime.datetime.utcnow(),
+            modified=datetime.datetime.utcnow(),
+            labels=["malicious-activity"],
+            confidence=90,
+            external_references=[
+                {
+                    "source_name": "Firehol cybercrime tracker list",
+                    "description": "CyberCrime, a project tracking command and control. "
+                    "This list contains command and control IP addresses.",
+                    "url": "https://iplists.firehol.org/?ipset=cybercrime",
+                }
+            ],
+        )
+
+        attach_pattern = builder.add_attack_pattern_for_mitre(
+            mitre_technique={
+                "label": "T1046",
+                "description": "Network Service Scanning ...",
+                "name": "Network Service Scanning",
+            },
+            observable_markings=[],
+            indicator=indicator,
+            external_references=[],
+        )
+
+        self.assertEqual(
+            attach_pattern["name"], "MITRE ATT&CK (Network Service Scanning - T1046)"
+        )
+        # Check bundle
+        self.assertEqual(len(builder.bundle_objects), 2)
+        self.assertEqual(builder.bundle_objects[0], attach_pattern)
+        # Check relationship
+        relationship = builder.bundle_objects[1]
+        self.assertEqual(relationship["target_ref"], attach_pattern["id"])
+        self.assertEqual(relationship["relationship_type"], "indicates")
+
+
+    def test_add_sighting(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+
+        observable_id = load_file("observable.json")["standard_id"]
+        stix_observable = load_file("stix_observable.json")
+        sighting = builder.add_sighting(
+            observable_id=observable_id,
+            observable_markings=[],
+            sighting_ext_refs=[],  # External references
+            indicator=None,
+        )
+
+        self.assertEqual(sighting["sighting_of_ref"], observable_id)
+        self.assertEqual(sighting["where_sighted_refs"], ["identity--5f18c204-0a7f-5061-a146-d29561d9c8aa"])
+        self.assertEqual(sighting["description"], "Sighting of IP

@@ -10,6 +10,7 @@ from pycti import (
     get_config_variable,
     StixCoreRelationship,
     StixSightingRelationship,
+    Label,
 )
 from stix2 import (
     Relationship,
@@ -22,7 +23,7 @@ from stix2 import (
     Sighting,
 )
 
-from .constants import MITRE_URL, CVE_REGEX
+from .constants import MITRE_URL, CVE_REGEX, FAKE_INDICATOR_ID
 from .helper import clean_config
 
 
@@ -219,7 +220,7 @@ class CrowdSecBuilder:
         stix_observable: dict,
         ip: str,
         pattern: str,
-        observable_markings: List,
+        observable_markings: List[str],
         reputation: str,
     ) -> Indicator:
         indicator = Indicator(
@@ -260,7 +261,11 @@ class CrowdSecBuilder:
         return indicator
 
     def add_attack_pattern_for_mitre(
-        self, mitre_technique, observable_markings, indicator, external_references
+        self,
+        mitre_technique: Dict,
+        observable_markings: List[str],
+        indicator: Indicator,
+        external_references: List[Dict],
     ) -> AttackPattern:
         description = f"{mitre_technique['label']}: {mitre_technique['description']}"
         name = f"MITRE ATT&CK ({mitre_technique['name']} - {mitre_technique['label']})"
@@ -300,8 +305,8 @@ class CrowdSecBuilder:
         observable_id: str,
         ip: str,
         reputation: str,
-        observable_markings: List,
-    ) -> None:
+        observable_markings: List[str],
+    ) -> Note:
         if reputation == "unknown":
             content = f"This is was not found in CrowdSec CTI. \n\n"
         else:
@@ -347,14 +352,15 @@ class CrowdSecBuilder:
 
         self.add_to_bundle([note])
 
+        return note
+
     def add_sighting(
         self,
         observable_id: str,
-        observable_markings: List,
-        sighting_ext_refs: List,
+        observable_markings: List[str],
+        sighting_ext_refs: List[Dict],
         indicator: Indicator,
-    ) -> None:
-        fake_indicator_id = "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8"
+    ) -> Sighting:
         first_seen = (
             parse(self.first_seen).strftime("%Y-%m-%dT%H:%M:%SZ")
             if self.first_seen
@@ -380,15 +386,17 @@ class CrowdSecBuilder:
             confidence=_get_confidence_level(self.confidence),
             object_marking_refs=observable_markings,
             external_references=sighting_ext_refs,
-            sighting_of_ref=indicator.id if indicator else fake_indicator_id,
+            sighting_of_ref=indicator.id if indicator else FAKE_INDICATOR_ID,
             where_sighted_refs=[self.get_or_create_crowdsec_ent()["standard_id"]],
             custom_properties={"x_opencti_sighting_of_ref": observable_id},
         )
 
         self.add_to_bundle([sighting])
 
+        return sighting
+
     def add_vulnerability_from_cve(
-        self, cve: str, observable_markings: List, observable_id: str
+        self, cve: str, observable_markings: List[str], observable_id: str
     ) -> Vulnerability:
         cve_name = cve.upper()
         vulnerability = Vulnerability(
@@ -442,7 +450,7 @@ class CrowdSecBuilder:
 
         return blocklist_references
 
-    def create_external_ref_for_mitre(self, mitre_technique) -> Dict:
+    def create_external_ref_for_mitre(self, mitre_technique: Dict) -> Dict:
         description = f"{mitre_technique['label']}: {mitre_technique['description']}"
         name = f"MITRE ATT&CK ({mitre_technique['name']} - {mitre_technique['label']})"
         ext_ref_dict = {
@@ -457,7 +465,7 @@ class CrowdSecBuilder:
     def handle_labels(
         self,
         observable_id: str,
-    ) -> None:
+    ) -> List[Label]:
         # Initialize labels and label colors
         labels = []
         labels_mitre_color = self.labels_mitre_color
@@ -502,6 +510,7 @@ class CrowdSecBuilder:
                 labels.extend(scenario_labels)
 
         # Create labels
+        result = []
         for value, color in labels:
             label = self.helper.api.label.read_or_create_unchecked(
                 value=value, color=color
@@ -511,11 +520,14 @@ class CrowdSecBuilder:
                 self.helper.api.stix_cyber_observable.add_label(
                     id=observable_id, label_id=label["id"]
                 )
+                result.append(label)
+
+        return result
 
     def handle_target_countries(
         self,
         attack_patterns: List[str],
-        observable_markings: List,
+        observable_markings: List[str],
     ) -> None:
         for country_alpha_2, val in self.target_countries.items():
             country_info = pycountry.countries.get(alpha_2=country_alpha_2)
