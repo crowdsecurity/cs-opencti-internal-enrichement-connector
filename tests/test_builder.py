@@ -7,8 +7,10 @@ import unittest
 from unittest.mock import MagicMock, PropertyMock
 
 import stix2
+from dateutil.parser import parse
 
 from src.crowdsec.builder import CrowdSecBuilder
+from src.crowdsec.constants import FAKE_INDICATOR_ID
 
 
 def load_file(filename: str):
@@ -33,6 +35,25 @@ class CrowdSecBuilderTest(unittest.TestCase):
         )
         cls.helper.api.stix2.format_date.return_value = datetime.datetime.utcnow()
         cls.cti_data = load_file("malicious_ip.json")
+        cls.indicator = stix2.Indicator(
+            id="indicator--94c598e8-9174-58e0-9731-316e18f26916",
+            pattern="[ipv4-addr:value = '1.2.3.4']",
+            pattern_type="stix",
+            pattern_version="2.1",
+            valid_from=datetime.datetime.utcnow(),
+            created=datetime.datetime.utcnow(),
+            modified=datetime.datetime.utcnow(),
+            labels=["malicious-activity"],
+            confidence=90,
+            external_references=[
+                {
+                    "source_name": "Firehol cybercrime tracker list",
+                    "description": "CyberCrime, a project tracking command and control. "
+                                   "This list contains command and control IP addresses.",
+                    "url": "https://iplists.firehol.org/?ipset=cybercrime",
+                }
+            ],
+        )
 
     def test_init_builder(self):
         builder = CrowdSecBuilder(
@@ -156,7 +177,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         expected_ext_ref = stix2.ExternalReference(
             source_name="Firehol cybercrime tracker list",
             description="CyberCrime, a project tracking command and control. "
-            "This list contains command and control IP addresses.",
+                        "This list contains command and control IP addresses.",
             url="https://iplists.firehol.org/?ipset=cybercrime",
         )
         self.assertEqual(indicator.get("external_references"), [expected_ext_ref])
@@ -175,25 +196,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             cti_data=self.cti_data,
         )
 
-        indicator = stix2.Indicator(
-            id="indicator--94c598e8-9174-58e0-9731-316e18f26916",
-            pattern="[ipv4-addr:value = '1.2.3.4']",
-            pattern_type="stix",
-            pattern_version="2.1",
-            valid_from=datetime.datetime.utcnow(),
-            created=datetime.datetime.utcnow(),
-            modified=datetime.datetime.utcnow(),
-            labels=["malicious-activity"],
-            confidence=90,
-            external_references=[
-                {
-                    "source_name": "Firehol cybercrime tracker list",
-                    "description": "CyberCrime, a project tracking command and control. "
-                    "This list contains command and control IP addresses.",
-                    "url": "https://iplists.firehol.org/?ipset=cybercrime",
-                }
-            ],
-        )
+        indicator = self.indicator
 
         attach_pattern = builder.add_attack_pattern_for_mitre(
             mitre_technique={
@@ -217,7 +220,6 @@ class CrowdSecBuilderTest(unittest.TestCase):
         self.assertEqual(relationship["target_ref"], attach_pattern["id"])
         self.assertEqual(relationship["relationship_type"], "indicates")
 
-
     def test_add_sighting(self):
         builder = CrowdSecBuilder(
             helper=self.helper,
@@ -226,7 +228,6 @@ class CrowdSecBuilderTest(unittest.TestCase):
         )
 
         observable_id = load_file("observable.json")["standard_id"]
-        stix_observable = load_file("stix_observable.json")
         sighting = builder.add_sighting(
             observable_id=observable_id,
             observable_markings=[],
@@ -234,6 +235,21 @@ class CrowdSecBuilderTest(unittest.TestCase):
             indicator=None,
         )
 
-        self.assertEqual(sighting["sighting_of_ref"], observable_id)
-        self.assertEqual(sighting["where_sighted_refs"], ["identity--5f18c204-0a7f-5061-a146-d29561d9c8aa"])
-        self.assertEqual(sighting["description"], "Sighting of IP
+        self.assertEqual(sighting["sighting_of_ref"], FAKE_INDICATOR_ID)
+
+        sighting_2 = builder.add_sighting(
+            observable_id=observable_id,
+            observable_markings=[],
+            sighting_ext_refs=[],  # External references
+            indicator=self.indicator,
+        )
+
+        self.assertEqual(sighting_2["sighting_of_ref"], "indicator--94c598e8-9174-58e0-9731-316e18f26916")
+        first_seen = self.cti_data.get("history", {}).get("first_seen", "")
+        last_seen = self.cti_data.get("history", {}).get("last_seen", "")
+        self.assertEqual(
+            datetime.datetime.utcfromtimestamp(sighting_2.get("first_seen").timestamp()).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            parse(first_seen).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        self.assertEqual(
+            datetime.datetime.utcfromtimestamp(sighting_2.get("last_seen").timestamp()).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            parse(last_seen).strftime("%Y-%m-%dT%H:%M:%SZ"))

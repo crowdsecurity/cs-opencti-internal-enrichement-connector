@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """CrowdSec builder module."""
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 import pycountry
 from dateutil.parser import parse
@@ -359,7 +359,7 @@ class CrowdSecBuilder:
         observable_id: str,
         observable_markings: List[str],
         sighting_ext_refs: List[Dict],
-        indicator: Indicator,
+        indicator: Optional[Indicator],
     ) -> Sighting:
         first_seen = (
             parse(self.first_seen).strftime("%Y-%m-%dT%H:%M:%SZ")
