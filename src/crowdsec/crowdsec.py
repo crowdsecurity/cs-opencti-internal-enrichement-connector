@@ -97,6 +97,8 @@ class CrowdSecConnector:
     def enrich_observable(self, observable: Dict, stix_observable: Dict):
         self.helper.metric.inc("run_count")
         self.helper.metric.state("running")
+        self.helper.log_debug(f"Processing observable {observable}")
+        self.helper.log_debug(f"Processing stix_observable {stix_observable}")
         observable_id = observable["standard_id"]
         ip = observable["value"]
         observable_markings = [
@@ -114,6 +116,7 @@ class CrowdSecConnector:
             return
 
         # Retrieve specific data from CTI
+        self.helper.log_debug(f"CTI data for {ip}: {cti_data}")
         reputation = cti_data.get("reputation", "")
         mitre_techniques = cti_data.get("mitre_techniques", [])
         cves = cti_data.get("cves", [])
