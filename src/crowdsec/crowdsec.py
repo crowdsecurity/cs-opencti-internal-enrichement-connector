@@ -177,8 +177,6 @@ class CrowdSecConnector:
         if self.create_note:
             self.builder.add_note(
                 observable_id=observable_id,
-                ip=ip,
-                reputation=reputation,
                 observable_markings=observable_markings,
             )
         # Create sightings relationship between CrowdSec organisation and observable

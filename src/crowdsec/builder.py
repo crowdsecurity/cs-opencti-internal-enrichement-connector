@@ -164,6 +164,7 @@ class CrowdSecBuilder:
         )
 
         # Parse data from CTI response
+        self.ip = cti_data.get("ip", "")
         self.behaviors = cti_data.get("behaviors", [])
         self.references = cti_data.get("references", [])
         self.mitre_techniques = cti_data.get("mitre_techniques", [])
@@ -303,11 +304,9 @@ class CrowdSecBuilder:
     def add_note(
         self,
         observable_id: str,
-        ip: str,
-        reputation: str,
         observable_markings: List[str],
     ) -> Note:
-        if reputation == "unknown":
+        if self.reputation == "unknown":
             content = f"This is was not found in CrowdSec CTI. \n\n"
         else:
             content = f"**Reputation**: {self.reputation} \n\n"
@@ -341,7 +340,7 @@ class CrowdSecBuilder:
                 created=self.helper.api.stix2.format_date(), content=content
             ),
             object_refs=[observable_id],
-            abstract=f"CrowdSec enrichment for {ip}",
+            abstract=f"CrowdSec enrichment for {self.ip}",
             content=content,
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
             object_marking_refs=observable_markings,

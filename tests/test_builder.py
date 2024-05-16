@@ -33,6 +33,9 @@ class CrowdSecBuilderTest(unittest.TestCase):
         cls.helper.api.attack_pattern.generate_id.return_value = (
             "attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0"
         )
+        cls.helper.api.note.generate_id.return_value = (
+            "note--76cc9e78-e842-55fb-a0a0-8dbe3618cadd"
+        )
         cls.helper.api.stix2.format_date.return_value = datetime.datetime.utcnow()
         cls.cti_data = load_file("malicious_ip.json")
         cls.indicator = stix2.Indicator(
@@ -49,7 +52,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
                 {
                     "source_name": "Firehol cybercrime tracker list",
                     "description": "CyberCrime, a project tracking command and control. "
-                                   "This list contains command and control IP addresses.",
+                    "This list contains command and control IP addresses.",
                     "url": "https://iplists.firehol.org/?ipset=cybercrime",
                 }
             ],
@@ -177,7 +180,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         expected_ext_ref = stix2.ExternalReference(
             source_name="Firehol cybercrime tracker list",
             description="CyberCrime, a project tracking command and control. "
-                        "This list contains command and control IP addresses.",
+            "This list contains command and control IP addresses.",
             url="https://iplists.firehol.org/?ipset=cybercrime",
         )
         self.assertEqual(indicator.get("external_references"), [expected_ext_ref])
@@ -220,6 +223,25 @@ class CrowdSecBuilderTest(unittest.TestCase):
         self.assertEqual(relationship["target_ref"], attach_pattern["id"])
         self.assertEqual(relationship["relationship_type"], "indicates")
 
+    def test_add_note(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+        observable = load_file("observable.json")
+        observable_id = observable["standard_id"]
+        ip = observable["value"]
+        note = builder.add_note(
+            observable_id=observable_id,
+            observable_markings=[],
+        )
+
+        self.assertEqual(note["abstract"], f"CrowdSec enrichment for {ip}")
+        # Check bundle
+        self.assertEqual(len(builder.bundle_objects), 1)
+        self.assertEqual(builder.bundle_objects[0], note)
+
     def test_add_sighting(self):
         builder = CrowdSecBuilder(
             helper=self.helper,
@@ -244,12 +266,21 @@ class CrowdSecBuilderTest(unittest.TestCase):
             indicator=self.indicator,
         )
 
-        self.assertEqual(sighting_2["sighting_of_ref"], "indicator--94c598e8-9174-58e0-9731-316e18f26916")
+        self.assertEqual(
+            sighting_2["sighting_of_ref"],
+            "indicator--94c598e8-9174-58e0-9731-316e18f26916",
+        )
         first_seen = self.cti_data.get("history", {}).get("first_seen", "")
         last_seen = self.cti_data.get("history", {}).get("last_seen", "")
         self.assertEqual(
-            datetime.datetime.utcfromtimestamp(sighting_2.get("first_seen").timestamp()).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            parse(first_seen).strftime("%Y-%m-%dT%H:%M:%SZ"))
+            datetime.datetime.utcfromtimestamp(
+                sighting_2.get("first_seen").timestamp()
+            ).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            parse(first_seen).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        )
         self.assertEqual(
-            datetime.datetime.utcfromtimestamp(sighting_2.get("last_seen").timestamp()).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            parse(last_seen).strftime("%Y-%m-%dT%H:%M:%SZ"))
+            datetime.datetime.utcfromtimestamp(
+                sighting_2.get("last_seen").timestamp()
+            ).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            parse(last_seen).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        )
