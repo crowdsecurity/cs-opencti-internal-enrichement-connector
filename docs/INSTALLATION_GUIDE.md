@@ -18,7 +18,7 @@
 
 ## Installation
 
-Enabling this connector could be done by launching the Python process directly after providing the correct configuration in the `config.yml` file or within a Docker environment using the image `opencti/connector-crowdsec:latest`. 
+Enabling this connector could be done by launching the `main.py` Python process directly after providing the correct configuration in the `config.yml` file or within a Docker environment using the image `opencti/connector-crowdsec:latest`. 
 
 We provide an example of [docker-compose.yml](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/blob/main/docker-compose.yml) file that could be used independently or integrated to the global `docker-compose.yml` file of OpenCTI.
 

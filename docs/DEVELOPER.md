@@ -75,16 +75,16 @@ docker exec -ti docker_connector-crowdsec_1 /bin/sh
 Then: 
 
 ```bash
-cd /opt/opencti-crowdsec/ && python3 crowdsec.py
+cd /opt/opencti-crowdsec/ && python3 main.py
 ```
 
-You should see log messages, one of which contains `CrowdSec connector started`.
+You should see log messages, one of which contains `CrowdSec enrichment connector started`.
 
-**N.B:** In development, we are using a specific Docker file that will not launch the main python process `crowdsec.py` on container start. 
+**N.B:** In development, we are using a specific Docker file that will not launch the main python process `main.py` on container start. 
 
-That's why you have to launch it manually with `python3 crowdsec.py`.
+That's why you have to launch it manually with `python3 main.py`.
 
-Thanks to this, you can test any code modification by stopping the process (`CTRL+C` or similar), then restarting it (`python3 crowdsec.py`).
+Thanks to this, you can test any code modification by stopping the process (`CTRL+C` or similar), then restarting it (`python3 main.py`).
 
 
 
