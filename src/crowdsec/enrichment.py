@@ -14,7 +14,7 @@ from .constants import CTI_URL
 from .helper import clean_config
 
 
-class CrowdSecConnector:
+class CrowdSecEnrichment:
     def __init__(self):
         self.crowdsec_ent = None
         # Instantiate the connector helper from config
@@ -209,5 +209,5 @@ class CrowdSecConnector:
         self.enrich_observable(observable, stix_observable)
 
     def start(self) -> None:
-        self.helper.log_info("CrowdSec connector started")
+        self.helper.log_info("CrowdSec enrichment connector started")
         self.helper.listen(message_callback=self._process_message)

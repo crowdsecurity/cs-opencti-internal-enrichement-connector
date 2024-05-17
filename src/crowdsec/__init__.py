@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """CrowdSec internal enrichment connector module."""
 
-from .crowdsec import CrowdSecConnector
+from .enrichment import CrowdSecEnrichment
 
-__all__ = ["CrowdSecConnector"]
+__all__ = ["CrowdSecEnrichment"]

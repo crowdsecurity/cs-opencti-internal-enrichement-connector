@@ -2,12 +2,12 @@
 """CrowdSec internal enrichment connector main file."""
 
 from time import sleep
-from crowdsec import CrowdSecConnector
+from crowdsec import CrowdSecEnrichment
 
 
 if __name__ == "__main__":
     try:
-        crowdsec_connector = CrowdSecConnector()
+        crowdsec_connector = CrowdSecEnrichment()
         crowdsec_connector.start()
     except Exception as e:
         print(e)
