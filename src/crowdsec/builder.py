@@ -426,7 +426,7 @@ class CrowdSecBuilder:
         """
         We have to create the external reference in database as creating the object only may lead to data loss
         Without this, if we delete the external reference in OpenCTI UI, it won't be re-created on next enrichment
-        @TODO: find a better way to handle this
+        @see https://github.com/OpenCTI-Platform/connectors/issues/2139
         """
         self.helper.api.external_reference.create(**ext_ref_dict)
 
