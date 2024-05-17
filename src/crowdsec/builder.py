@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """CrowdSec builder module."""
-
 from typing import List, Dict, Optional
 
 import pycountry
@@ -11,6 +10,8 @@ from pycti import (
     StixCoreRelationship,
     StixSightingRelationship,
     Label,
+    OpenCTIStix2,
+    STIX_EXT_OCTI_SCO,
 )
 from stix2 import (
     Relationship,
@@ -183,19 +184,23 @@ class CrowdSecBuilder:
             self.bundle_objects.append(obj)
         return self.bundle_objects
 
+    @staticmethod
     def add_external_reference_to_observable(
-        self, stix_observable: Dict, source_name: str, url: str, description: str
+            stix_observable: Dict, source_name: str, url: str, description: str
     ) -> Dict[str, str]:
         ext_ref_dict = {
             "source_name": source_name,
             "url": url,
             "description": description,
         }
-        self._add_external_ref_to_database(ext_ref_dict)
 
-        if "external_references" not in stix_observable:
-            stix_observable["external_references"] = []
-        stix_observable["external_references"].append(ext_ref_dict)
+        OpenCTIStix2.put_attribute_in_extension(
+            object=stix_observable,
+            extension_id=STIX_EXT_OCTI_SCO,
+            key="external_references",
+            value=ext_ref_dict,
+            multiple=True,
+        )
 
         return ext_ref_dict
 
@@ -581,9 +586,13 @@ class CrowdSecBuilder:
             self.helper.log_debug(
                 f"[CrowdSec] sending bundle (length:{len(bundle_objects)}): {bundle_objects}"
             )
-            # serialized_bundle = Bundle(objects=bundle_objects, allow_custom=True).serialize()
+            # serialized_bundle = Bundle(
+            #     objects=bundle_objects, allow_custom=True
+            # ).serialize()
             serialized_bundle = self.helper.stix2_create_bundle(self.bundle_objects)
-            bundles_sent = self.helper.send_stix2_bundle(serialized_bundle)
+            bundles_sent = self.helper.send_stix2_bundle(
+                bundle=serialized_bundle, update=True
+            )
             self.helper.log_debug(
                 f"Sent {len(bundles_sent)} stix bundle(s) for worker import"
             )
