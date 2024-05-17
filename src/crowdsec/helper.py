@@ -13,4 +13,7 @@ def clean_config(value: str) -> str:
     Returns:
         str: The cleaned value.
     """
-    return re.sub(r"[\"']", "", value)
+    if isinstance(value, str):
+        return re.sub(r"[\"']", "", value)
+
+    return ""
