@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Correct working directory
-cd /opt/opencti-crowdsec
+cd /opt/opencti-crowdsec || exit
 
 pip3 install --no-cache-dir -r requirements-dev.txt
 
