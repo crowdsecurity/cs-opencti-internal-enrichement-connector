@@ -16,9 +16,8 @@ from .helper import clean_config
 
 class CrowdSecConnector:
     def __init__(self):
-        # Instantiate the connector helper from config
         self.crowdsec_ent = None
-
+        # Instantiate the connector helper from config
         config_file_path = Path(__file__).parent.parent.resolve() / "config.yml"
         self.config = (
             yaml.load(open(config_file_path), Loader=yaml.FullLoader)

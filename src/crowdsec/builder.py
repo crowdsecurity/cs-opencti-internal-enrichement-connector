@@ -47,6 +47,12 @@ class CrowdSecBuilder:
         self, helper: OpenCTIConnectorHelper, config: Dict, cti_data: Dict
     ) -> None:
         self.helper = helper
+        self.update_existing_data = get_config_variable(
+            "CONNECTOR_UPDATE_EXISTING_DATA",
+            ["connector", "update_existing_data"],
+            config,
+            False,
+        )
         self.crowdsec_ent_name = clean_config(
             get_config_variable(
                 "CROWDSEC_NAME", ["crowdsec", "name"], config, default="CrowdSec"
@@ -583,7 +589,9 @@ class CrowdSecBuilder:
             )
             # serialized_bundle = Bundle(objects=bundle_objects, allow_custom=True).serialize()
             serialized_bundle = self.helper.stix2_create_bundle(self.bundle_objects)
-            bundles_sent = self.helper.send_stix2_bundle(serialized_bundle)
+            bundles_sent = self.helper.send_stix2_bundle(
+                bundle=serialized_bundle, update=self.update_existing_data
+            )
             self.helper.log_debug(
                 f"Sent {len(bundles_sent)} stix bundle(s) for worker import"
             )

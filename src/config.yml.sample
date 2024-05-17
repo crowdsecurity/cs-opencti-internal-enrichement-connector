@@ -10,6 +10,7 @@ connector:
   confidence_level: 100 # From 0 (Unknown) to 100 (Fully trusted)
   log_level: 'error' # Log level (debug, info, warn, error)
   auto: true # Enable/disable auto-enrichment of observables
+  update_existing_data: false # Enable/disable update of existing data in database
 
 crowdsec:
   key: 'ChangeMe'

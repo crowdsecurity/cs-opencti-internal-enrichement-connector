@@ -34,6 +34,7 @@ Configuration parameters are provided using environment variables as described b
 | `CONNECTOR_SCOPE` | Yes          | String    | Supported scope: `IPv4-Addr`                                                                                   |
 | `CONNECTOR_CONFIDENCE_LEVEL` | Yes          | Integer | The default confidence level  (an integer between 0 and 100).                                                                |
 | `CONNECTOR_AUTO` | No | Boolean | Enable/disable auto-enrichment of observables. Default: `false` |
+| `CONNECTOR_UPDATE_EXISTING_DATA` | No | Boolean | Enable/disable update of existing data in database. Default: `false` |
 | `CONNECTOR_LOG_LEVEL` | No         | String    | The log level for this connector, could be `debug`, `info`, `warn` or `error` (less verbose). Default: `info`                                          |
 | `CROWDSEC_KEY`   | Yes       | String | CrowdSec CTI  API key. See [instructions to obtain it](https://docs.crowdsec.net/docs/next/cti_api/getting_started/#getting-an-api-key)                                                                         |
 | `CROWDSEC_API_VERSION` | No | String | CrowdSec API version. Supported version: `v2`. Default: `v2`. |

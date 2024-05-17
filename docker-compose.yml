@@ -8,6 +8,7 @@ services:
       - CONNECTOR_ID=ChangeMe # Add CrowdSec connector ID (any valid UUID v4)
       - CROWDSEC_KEY=ChangeMe # Add CrowdSec's CTI API Key
       - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
+      - CONNECTOR_UPDATE_EXISTING_DATA=false
       - CONNECTOR_NAME=CrowdSec
       - CROWDSEC_NAME=CrowdSec
       - CONNECTOR_SCOPE=IPv4-Addr # MIME type or Stix Object
