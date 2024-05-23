@@ -68,17 +68,17 @@ class CrowdSecBuilder:
         )
         self.crowdsec_ent = None
         self.bundle_objects = []
-        self.labels_scenario_use = get_config_variable(
-            "CROWDSEC_LABELS_SCENARIO_USE",
-            ["crowdsec", "labels_scenario_use"],
+        self.labels_scenario_name = get_config_variable(
+            "CROWDSEC_LABELS_SCENARIO_NAME",
+            ["crowdsec", "labels_scenario_name"],
             config,
             default=True,
         )
-        self.labels_scenario_only_name = get_config_variable(
-            "CROWDSEC_LABELS_SCENARIO_ONLY_NAME",
-            ["crowdsec", "labels_scenario_only_name"],
+        self.labels_scenario_label = get_config_variable(
+            "CROWDSEC_LABELS_SCENARIO_LABEL",
+            ["crowdsec", "labels_scenario_label"],
             config,
-            default=False,
+            default=True,
         )
         self.labels_scenario_color = clean_config(
             get_config_variable(
@@ -88,9 +88,9 @@ class CrowdSecBuilder:
                 default="#2E2A14",
             )
         )
-        self.labels_cve_use = get_config_variable(
-            "CROWDSEC_LABELS_CVE_USE",
-            ["crowdsec", "labels_cve_use"],
+        self.labels_cve = get_config_variable(
+            "CROWDSEC_LABELS_CVE",
+            ["crowdsec", "labels_cve"],
             config,
             default=False,
         )
@@ -102,9 +102,9 @@ class CrowdSecBuilder:
                 default="#800080",
             )
         )
-        self.labels_behavior_use = get_config_variable(
-            "CROWDSEC_LABELS_BEHAVIOR_USE",
-            ["crowdsec", "labels_behavior_use"],
+        self.labels_behavior = get_config_variable(
+            "CROWDSEC_LABELS_BEHAVIOR",
+            ["crowdsec", "labels_behavior"],
             config,
             default=False,
         )
@@ -116,9 +116,9 @@ class CrowdSecBuilder:
                 default="#808000",
             )
         )
-        self.labels_mitre_use = get_config_variable(
-            "CROWDSEC_LABELS_MITRE_USE",
-            ["crowdsec", "labels_mitre_use"],
+        self.labels_mitre = get_config_variable(
+            "CROWDSEC_LABELS_MITRE",
+            ["crowdsec", "labels_mitre"],
             config,
             default=False,
         )
@@ -130,9 +130,9 @@ class CrowdSecBuilder:
                 default="#000080",
             )
         )
-        self.labels_reputation_use = get_config_variable(
-            "CROWDSEC_LABELS_REPUTATION_USE",
-            ["crowdsec", "labels_reputation_use"],
+        self.labels_reputation = get_config_variable(
+            "CROWDSEC_LABELS_REPUTATION",
+            ["crowdsec", "labels_reputation"],
             config,
             default=False,
         )
@@ -478,25 +478,25 @@ class CrowdSecBuilder:
         labels_cve_color = self.labels_cve_color
         labels_behavior_color = self.labels_behavior_color
         # Mitre techniques
-        if self.labels_mitre_use:
+        if self.labels_mitre:
             for mitre_technique in self.mitre_techniques:
                 labels.append((mitre_technique["name"], labels_mitre_color))
         # CVEs
-        if self.labels_cve_use:
+        if self.labels_cve:
             for cve in self.cves:
                 labels.append((cve.upper(), labels_cve_color))
         # Behaviors
-        if self.labels_behavior_use:
+        if self.labels_behavior:
             for behavior in self.behaviors:
                 labels.append((behavior["name"], labels_behavior_color))
         # Reputation
-        if self.reputation and self.labels_reputation_use:
+        if self.reputation and self.labels_reputation:
             color_attribute = f"labels_reputation_{self.reputation}_color"
             color = getattr(self, color_attribute, None)
             if self.reputation != "unknown" and color is not None:
                 labels.append((self.reputation, color))
-        # Scenarios labels
-        if self.labels_scenario_use:
+        # Scenario's name
+        if self.labels_scenario_name:
             # We handle CVE labels separately to avoid duplicates
             filtered_scenarios = [
                 scenario
@@ -506,13 +506,15 @@ class CrowdSecBuilder:
             scenario_names = [
                 (attack["name"], scenario_label_color) for attack in filtered_scenarios
             ]
-            labels.extend(scenario_names)
-            if not self.labels_scenario_only_name:
-                scenario_labels = [
-                    (attack["label"], scenario_label_color)
-                    for attack in filtered_scenarios
-                ]
-                labels.extend(scenario_labels)
+            if scenario_names:
+                labels.extend(scenario_names)
+        # Scenario's label
+        if self.labels_scenario_label:
+            scenario_labels = [
+                (attack["label"], scenario_label_color)
+                for attack in self.attack_details
+            ]
+            labels.extend(scenario_labels)
 
         # Create labels
         result = []
