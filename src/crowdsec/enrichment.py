@@ -10,7 +10,7 @@ from pycti import OpenCTIConnectorHelper, get_config_variable
 
 from .builder import CrowdSecBuilder
 from .client import CrowdSecClient, QuotaExceedException
-from .constants import CTI_URL
+from .constants import CTI_URL, CTI_API_URL
 from .helper import clean_config
 
 
@@ -82,9 +82,7 @@ class CrowdSecEnrichment:
                 f"crowdsec api version '{self.crowdsec_api_version}' is not supported "
             )
         else:
-            self.api_base_url = (
-                f"https://cti.api.crowdsec.net/{self.crowdsec_api_version}/"
-            )
+            self.api_base_url = f"{CTI_API_URL}{self.crowdsec_api_version}/"
 
         self.client = CrowdSecClient(
             helper=self.helper,
