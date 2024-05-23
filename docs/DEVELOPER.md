@@ -5,6 +5,15 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Local installation](#local-installation)
+  - [Prepare local environment](#prepare-local-environment)
+  - [Update OpenCTI `docker-compose.yml`](#update-opencti-docker-composeyml)
+  - [Start Docker environment](#start-docker-environment)
+  - [Stop Docker environment](#stop-docker-environment)
+- [Unit tests](#unit-tests)
+- [Release process](#release-process)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
