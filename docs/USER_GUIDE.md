@@ -74,7 +74,7 @@ In this case, please put the variable name in lower case and separate it into 2 
 
 ```yaml
 crowdsec:
-	max_tlp: 'TLP:AMBER'
+    max_tlp: 'TLP:AMBER'
 ```
 
 You will find a `config.yml.sample` file as example.

@@ -119,16 +119,14 @@ docker-compose down -v
 First, prepare your virtual environment:
 
 ```bash
-cd src
-source ./env/bin/activate
+source src/env/bin/activate
 python -m pip install --upgrade pip
-pip install -r requirements-dev.txt
+python -m pip install -r tests/test-requirements.txt
 ```
 
 Then, run tests: 
 
 ```bash
-cd ../tests
 python -m pytest -v
 ```
 
@@ -145,8 +143,7 @@ npm install -g doctoc
 Then, run it in the documentation folder:
 
 ```bash
-cd docs
-doctoc .
+doctoc docs/*
 ```
 
 
