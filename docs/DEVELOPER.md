@@ -134,7 +134,7 @@ python -m pytest -v
 
 ## Update documentation table of contents
 
-To update the table of contents in the documentation, you can use the `doctoc` tool.
+To update the table of contents in the documentation, you can use [the `doctoc` tool](https://github.com/thlorenz/doctoc).
 
 First, install it:
 

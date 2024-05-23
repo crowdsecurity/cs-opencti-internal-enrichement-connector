@@ -13,6 +13,7 @@
     - [Parameters meaning](#parameters-meaning)
     - [Recommended settings](#recommended-settings)
   - [Use case: enrich an observable](#use-case-enrich-an-observable)
+    - [Example: Enrichment with recommended settings](#example-enrichment-with-recommended-settings)
   - [Additional information](#additional-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -87,6 +88,7 @@ You will find a `config.yml.sample` file as example.
   - CROWDSEC_LABELS_SCENARIO_NAME=true
   - CROWDSEC_LABELS_SCENARIO_LABEL=false
   - CROWDSEC_LABELS_CVE=true
+  - CROWDSEC_LABELS_MITRE=true
   - CROWDSEC_LABELS_REPUTATION=true
   - CROWDSEC_INDICATOR_CREATE_FROM='malicious,suspicious,known'
   - CROWDSEC_CREATE_NOTE=true
@@ -99,6 +101,29 @@ You will find a `config.yml.sample` file as example.
 If you create an `IPv4 address` observable, this connector will enable you to enrich it with data retrieved from CrowdSec's CTI. 
 
 If `CONNECTOR_AUTO` configuration is set to `true`, the observable will be automatically enriched when created. Otherwise, you'll need to enrich it manually by clicking on the enrichment icon and selecting the CrowdSec connector.
+
+#### Example: Enrichment with recommended settings
+
+In this example, we chose `146.70.186.190` as it is currently  reported for cve and mitre techniques.
+
+Assuming you have an observable whose `IPv4-Addr` value is equal to `146.70.186.190` and you have set the settings recommended above, the result of a CrowdSec's enrichment should be similar to the following description: 
+
+- With regard to the observable itself, you should see:
+  - a list of dark olive green scenario name labels (`crowdsecurity/http-admin-interface-probing`, `crowdsecurity/http-bad-user-agent`, etc.)
+  - a list of purple cve labels (`cve-2021-41773`, etc.)
+  - a red `malicious`reputation label 
+  - An external reference  to the [CrowdSec CTI's url](https://app.crowdsec.net/cti/146.70.186.190)
+  - A note with some content (confidence, first seen, last seen, behaviors, targeted countries, etc.)
+  - A list of relationships:
+    - `related` relationships leading to vulnerabilities created from CVEs
+    - `based-on` relationship leading to a CrowdSec CTI  indicator
+  - A sighting related to CrowdSec with the first and last seen informations
+- As the `CROWDSEC_INDICATOR_CREATE_FROM` recommended setting contains `malicious` reputation, an indicator has been created with:
+  - An external reference to the blocking list from which the flagged IP originates.
+  - A list of `indicates` relationship leading to attack patterns created using mitre techniques
+    - If you follow one of this relationship, you can navigate to the attack pattern created, where you will see
+      - An external reference to the MITRE ATT&CK url
+      - A list of `targets` relationships leading to location created from targeted countries (`Canada`, `Poland`, etc.)
 
 
 

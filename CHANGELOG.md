@@ -17,12 +17,16 @@ functions provided by the `src` folder and the following files: `docker-compose.
 
 - Change default recommended name from `crowdsec` to `CrowdSec`
 - Change CTI url to the console one
+- Do not add targeted countries in the insight: countries are now linked to attack pattern and also visible in a note
 
 ### Added
 
-- Add notes in observable
-- Add label types (`reputation`, `scenario`, `behavior`, `cve`, `mitre techniques` ) and associated colors
-- And configurations to enable/disable each label type
+- Add setting to create an indicator depending on the retrieved CrowdSec's CTI reputation
+- Add setting to create Attack Pattern from Mitre techniques
+- Add setting to create an insight related to the observable
+- Add setting to write a note in observable
+- Add label types (`reputation`, `scenario's name`, `scenario's label`, `behavior`, `cve`, `mitre techniques` ) and associated colors
+- And settings to enable/disable each label type
 
 ---
 
