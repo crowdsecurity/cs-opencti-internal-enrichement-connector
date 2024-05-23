@@ -5,7 +5,8 @@
 > Connector which enriches your knowledge by using CrowdSec's CTI API.
 
 [![Version](https://img.shields.io/github/v/release/crowdsecurity/cs-opencti-internal-enrichment-connector)](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/releases/)
-
+[![Unit Tests](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/actions/workflows/unittests.yml/badge.svg)](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/actions/workflows/unittests.yml)
+[![Code format](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/actions/workflows/code-format.yml/badge.svg)](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/actions/workflows/code-format.yml)
 
 ## Usage
 

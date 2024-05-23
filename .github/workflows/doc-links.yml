@@ -1,7 +1,11 @@
-on:
-  workflow_dispatch:
+name: Documentation links
 
-name: Markdown files test
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
