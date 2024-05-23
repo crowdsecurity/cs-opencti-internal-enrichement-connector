@@ -2,7 +2,7 @@ name: Python Unittests
 
 on:
   push:
-    branches: [ main, feat/improvements-p1 ]
+    branches: [ main ]
     paths-ignore:
       - '**.md'
   pull_request:
