@@ -13,6 +13,7 @@
   - [Start Docker environment](#start-docker-environment)
   - [Stop Docker environment](#stop-docker-environment)
 - [Unit tests](#unit-tests)
+- [Update documentation table of contents](#update-documentation-table-of-contents)
 - [Release process](#release-process)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -131,7 +132,22 @@ cd ../tests
 python -m pytest -v
 ```
 
+## Update documentation table of contents
 
+To update the table of contents in the documentation, you can use the `doctoc` tool.
+
+First, install it:
+
+```bash
+npm install -g doctoc
+```
+
+Then, run it in the documentation folder:
+
+```bash
+cd docs
+doctoc .
+```
 
 
 
