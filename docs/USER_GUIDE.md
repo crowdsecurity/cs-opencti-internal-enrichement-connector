@@ -6,7 +6,14 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
 
+- [Description](#description)
+  - [Configuration](#configuration)
+    - [Parameters meaning](#parameters-meaning)
+    - [Recommended settings](#recommended-settings)
+  - [Use case: enrich an observable](#use-case-enrich-an-observable)
+  - [Additional information](#additional-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
