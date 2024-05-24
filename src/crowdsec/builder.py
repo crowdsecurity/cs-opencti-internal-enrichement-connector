@@ -226,7 +226,7 @@ class CrowdSecBuilder:
         observable_id: str,
         stix_observable: dict,
         pattern: str,
-        observable_markings: List[str],
+        markings: List[str],
     ) -> Indicator:
         indicator = Indicator(
             id=self.helper.api.indicator.generate_id(pattern),
@@ -238,7 +238,7 @@ class CrowdSecBuilder:
             #  We do not use first_seen as OpenCTI will add some duration to define valid_until
             valid_from=self.helper.api.stix2.format_date(self.last_seen),
             confidence=_get_confidence_level(self.confidence),
-            object_marking_refs=observable_markings,
+            object_marking_refs=markings,
             external_references=self._handle_blocklist_references(self.references),
             indicator_types=(
                 ["malicious-activity"] if self.reputation == "malicious" else []
@@ -268,7 +268,7 @@ class CrowdSecBuilder:
     def add_attack_pattern_for_mitre(
         self,
         mitre_technique: Dict,
-        observable_markings: List[str],
+        markings: List[str],
         indicator: Indicator,
         external_references: List[Dict],
     ) -> AttackPattern:
@@ -285,7 +285,7 @@ class CrowdSecBuilder:
                 "x_mitre_id": mitre_technique["name"],
             },
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-            object_marking_refs=observable_markings,
+            object_marking_refs=markings,
             external_references=external_references,
         )
         relationship = Relationship(
@@ -308,7 +308,7 @@ class CrowdSecBuilder:
     def add_note(
         self,
         observable_id: str,
-        observable_markings: List[str],
+        markings: List[str],
     ) -> Note:
         if self.reputation == "unknown":
             content = f"This is was not found in CrowdSec CTI. \n\n"
@@ -347,7 +347,7 @@ class CrowdSecBuilder:
             abstract=f"CrowdSec enrichment for {self.ip}",
             content=content,
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-            object_marking_refs=observable_markings,
+            object_marking_refs=markings,
             custom_properties={
                 "note_types": ["external"],
             },
@@ -360,7 +360,7 @@ class CrowdSecBuilder:
     def add_sighting(
         self,
         observable_id: str,
-        observable_markings: List[str],
+        markings: List[str],
         sighting_ext_refs: List[Dict],
         indicator: Optional[Indicator],
     ) -> Sighting:
@@ -387,7 +387,7 @@ class CrowdSecBuilder:
             last_seen=last_seen,
             count=1,
             confidence=_get_confidence_level(self.confidence),
-            object_marking_refs=observable_markings,
+            object_marking_refs=markings,
             external_references=sighting_ext_refs,
             sighting_of_ref=indicator.id if indicator else FAKE_INDICATOR_ID,
             where_sighted_refs=[self.get_or_create_crowdsec_ent()["standard_id"]],
@@ -399,7 +399,7 @@ class CrowdSecBuilder:
         return sighting
 
     def add_vulnerability_from_cve(
-        self, cve: str, observable_markings: List[str], observable_id: str
+        self, cve: str, markings: List[str], observable_id: str
     ) -> Vulnerability:
         cve_name = cve.upper()
         vulnerability = Vulnerability(
@@ -407,7 +407,7 @@ class CrowdSecBuilder:
             name=cve_name,
             description=cve_name,
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-            object_marking_refs=observable_markings,
+            object_marking_refs=markings,
         )
         relationship = Relationship(
             id=StixCoreRelationship.generate_id(
@@ -532,7 +532,7 @@ class CrowdSecBuilder:
     def handle_target_countries(
         self,
         attack_patterns: List[str],
-        observable_markings: List[str],
+        markings: List[str],
     ) -> None:
         for country_alpha_2, val in self.target_countries.items():
             country_info = pycountry.countries.get(alpha_2=country_alpha_2)
@@ -558,7 +558,7 @@ class CrowdSecBuilder:
                     ],
                 },
                 created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-                object_marking_refs=observable_markings,
+                object_marking_refs=markings,
             )
 
             self.add_to_bundle([country])

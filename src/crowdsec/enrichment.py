@@ -154,7 +154,7 @@ class CrowdSecEnrichment:
             if indicator and self.attack_pattern_create_from_mitre:
                 attack_pattern = self.builder.add_attack_pattern_for_mitre(
                     mitre_technique=mitre_technique,
-                    observable_markings=observable_markings,
+                    markings=observable_markings,
                     indicator=indicator,
                     external_references=[mitre_external_reference],
                 )
@@ -172,13 +172,13 @@ class CrowdSecEnrichment:
         if self.create_note:
             self.builder.add_note(
                 observable_id=observable_id,
-                observable_markings=observable_markings,
+                markings=observable_markings,
             )
         # Create sightings relationship between CrowdSec organisation and observable
         if self.create_sighting:
             self.builder.add_sighting(
                 observable_id=observable_id,
-                observable_markings=observable_markings,
+                markings=observable_markings,
                 sighting_ext_refs=sighting_ext_refs,
                 indicator=indicator if indicator else None,
             )

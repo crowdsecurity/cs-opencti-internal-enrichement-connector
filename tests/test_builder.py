@@ -169,7 +169,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             observable_id=observable_id,
             stix_observable=stix_observable,
             pattern=f"[ipv4-addr:value = '{stix_observable['value']}']",
-            observable_markings=[],
+            markings=[],
         )
         # Check indicator
         self.assertEqual(indicator.get("pattern_type"), "stix")
@@ -204,7 +204,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
                 "description": "Network Service Scanning ...",
                 "name": "Network Service Scanning",
             },
-            observable_markings=[],
+            markings=[],
             indicator=indicator,
             external_references=[],
         )
@@ -231,7 +231,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         ip = observable["value"]
         note = builder.add_note(
             observable_id=observable_id,
-            observable_markings=[],
+            markings=[],
         )
 
         self.assertEqual(note["abstract"], f"CrowdSec enrichment for {ip}")
@@ -249,7 +249,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         observable_id = load_file("observable.json")["standard_id"]
         sighting = builder.add_sighting(
             observable_id=observable_id,
-            observable_markings=[],
+            markings=[],
             sighting_ext_refs=[],  # External references
             indicator=None,
         )
@@ -258,7 +258,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
 
         sighting_2 = builder.add_sighting(
             observable_id=observable_id,
-            observable_markings=[],
+            markings=[],
             sighting_ext_refs=[],  # External references
             indicator=self.indicator,
         )
