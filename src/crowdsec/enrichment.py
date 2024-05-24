@@ -140,10 +140,8 @@ class CrowdSecEnrichment:
             indicator = self.builder.add_indicator_based_on(
                 observable_id,
                 stix_observable,
-                ip,
                 pattern,
                 observable_markings,
-                reputation,
             )
         # Handle mitre_techniques
         attack_patterns = []

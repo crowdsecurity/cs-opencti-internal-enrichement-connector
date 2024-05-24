@@ -225,16 +225,14 @@ class CrowdSecBuilder:
         self,
         observable_id: str,
         stix_observable: dict,
-        ip: str,
         pattern: str,
         observable_markings: List[str],
-        reputation: str,
     ) -> Indicator:
         indicator = Indicator(
             id=self.helper.api.indicator.generate_id(pattern),
-            name=f"CrowdSec CTI ({reputation} IP: {ip})",
+            name=f"CrowdSec CTI ({self.reputation} IP: {self.ip})",
             created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-            description=f"CrowdSec CTI detection for {ip}",
+            description=f"CrowdSec CTI detection for {self.ip}",
             pattern=pattern,
             pattern_type="stix",
             #  We do not use first_seen as OpenCTI will add some duration to define valid_until
@@ -243,7 +241,7 @@ class CrowdSecBuilder:
             object_marking_refs=observable_markings,
             external_references=self._handle_blocklist_references(self.references),
             indicator_types=(
-                ["malicious-activity"] if reputation == "malicious" else []
+                ["malicious-activity"] if self.reputation == "malicious" else []
             ),
             custom_properties={
                 "x_opencti_main_observable_type": stix_observable["x_opencti_type"],

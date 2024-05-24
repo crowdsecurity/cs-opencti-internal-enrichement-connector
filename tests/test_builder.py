@@ -164,15 +164,12 @@ class CrowdSecBuilderTest(unittest.TestCase):
 
         observable_id = load_file("observable.json")["standard_id"]
         stix_observable = load_file("stix_observable.json")
-        reputation = "suspicious"
 
         indicator = builder.add_indicator_based_on(
             observable_id=observable_id,
             stix_observable=stix_observable,
-            ip=stix_observable["value"],
             pattern=f"[ipv4-addr:value = '{stix_observable['value']}']",
             observable_markings=[],
-            reputation=reputation,
         )
         # Check indicator
         self.assertEqual(indicator.get("pattern_type"), "stix")
