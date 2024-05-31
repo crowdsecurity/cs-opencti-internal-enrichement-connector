@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """CrowdSec helper module."""
-import re
 import datetime
+import re
 from typing import Optional, Dict
 
 from .constants import LAST_ENRICHMENT_PATTERN
