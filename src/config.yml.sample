@@ -15,8 +15,6 @@ connector:
 crowdsec:
   key: 'ChangeMe'
   api_version: v2 # v2 is the only supported version for now
-  name: 'CrowdSec' # Name of CrowdSec organisation in OpenCTI
-  description: 'CrowdSec CTI enrichment' # Description of CrowdSec organisation in OpenCTI
   max_tlp: 'TLP:AMBER' # Max TLP level for observable enrichment
   labels_scenario_name: true # Enable/disable scenario's name labels
   labels_scenario_label: false # Enable/disable scenario's label labels
@@ -36,3 +34,5 @@ crowdsec:
   attack_pattern_create_from_mitre: true # Enable/disable creation of attack patterns from MITRE techniques
   create_note: true # Enable/disable creation of note in observable for each enrichment
   create_sighting: true # Enable/disable creation of sighting for each enrichment
+  last_enrichment_date_in_description: true # Enable/disable saving the last enrichment date in observable description
+  min_delay_between_enrichments: 300 # Minimum delay between two CrowdSec enrichments in seconds. (Use last enrichment date saved in description.)

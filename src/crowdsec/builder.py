@@ -53,19 +53,8 @@ class CrowdSecBuilder:
             config,
             False,
         )
-        self.crowdsec_ent_name = clean_config(
-            get_config_variable(
-                "CROWDSEC_NAME", ["crowdsec", "name"], config, default="CrowdSec"
-            )
-        )
-        self.crowdsec_ent_desc = clean_config(
-            get_config_variable(
-                "CROWDSEC_DESCRIPTION",
-                ["crowdsec", "description"],
-                config,
-                default="CrowdSec CTI enrichment",
-            )
-        )
+        self.crowdsec_ent_name = "CrowdSec"
+        self.crowdsec_ent_desc = "Curated Threat Intelligence Powered by the Crowd"
         self.crowdsec_ent = None
         self.bundle_objects = []
         self.labels_scenario_name = get_config_variable(

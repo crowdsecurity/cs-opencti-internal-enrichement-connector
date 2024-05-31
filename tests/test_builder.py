@@ -66,7 +66,10 @@ class CrowdSecBuilderTest(unittest.TestCase):
         )
         self.assertEqual(len(builder.bundle_objects), 0)
         self.assertEqual(builder.crowdsec_ent_name, "CrowdSec")
-        self.assertEqual(builder.crowdsec_ent_desc, "CrowdSec CTI enrichment")
+        self.assertEqual(
+            builder.crowdsec_ent_desc,
+            "Curated Threat Intelligence Powered by the Crowd",
+        )
         self.assertEqual(builder.labels_scenario_name, True)
         self.assertEqual(builder.labels_scenario_label, True)
         self.assertEqual(builder.labels_scenario_color, "#2E2A14")

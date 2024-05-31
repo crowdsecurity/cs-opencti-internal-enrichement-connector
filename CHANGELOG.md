@@ -18,6 +18,7 @@ functions provided by the `src` folder and the following files: `docker-compose.
 - Change default recommended name from `crowdsec` to `CrowdSec`
 - Change CTI url to the console one
 - Do not add targeted countries in the insight: countries are now linked to attack pattern and also visible in a note
+- Skip enrichment if the observable has already been enriched by CrowdSec less than a configurable time ago
 
 ### Added
 
@@ -27,6 +28,9 @@ functions provided by the `src` folder and the following files: `docker-compose.
 - Add setting to write a note in observable
 - Add label types (`reputation`, `scenario's name`, `scenario's label`, `behavior`, `cve`, `mitre techniques` ) and associated colors
 - And settings to enable/disable each label type
+- Add setting to store last CrowdSec enrichment date in description
+- Add setting to specify a minimum delay between two enrichments
+
 
 ---
 
