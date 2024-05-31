@@ -31,6 +31,9 @@ functions provided by the `src` folder and the following files: `docker-compose.
 - Add setting to store last CrowdSec enrichment date in description
 - Add setting to specify a minimum delay between two enrichments
 
+### Removed
+
+- Remove `CROWDSEC_NAME` and `CROWDSEC_DESCRIPTION` settings
 
 ---
 

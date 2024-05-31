@@ -83,8 +83,6 @@ You will find a `config.yml.sample` file as example.
 
 #### Recommended settings
 
-
-
   - CROWDSEC_LABELS_SCENARIO_NAME=true
   - CROWDSEC_LABELS_SCENARIO_LABEL=false
   - CROWDSEC_LABELS_CVE=true
@@ -93,8 +91,6 @@ You will find a `config.yml.sample` file as example.
   - CROWDSEC_INDICATOR_CREATE_FROM='malicious,suspicious,known'
   - CROWDSEC_CREATE_NOTE=true
   - CROWDSEC_CREATE_SIGHTING=true
-
-
 
 ### Use case: enrich an observable
 
