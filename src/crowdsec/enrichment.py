@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """CrowdSec internal enrichment module."""
 import os
+import time
 from pathlib import Path
 from typing import Dict, Any
 from urllib.parse import urljoin
@@ -11,7 +12,7 @@ from pycti import OpenCTIConnectorHelper, get_config_variable
 from .builder import CrowdSecBuilder
 from .client import CrowdSecClient, QuotaExceedException
 from .constants import CTI_URL, CTI_API_URL
-from .helper import clean_config
+from .helper import clean_config, handle_observable_description
 
 
 class CrowdSecEnrichment:
@@ -45,6 +46,22 @@ class CrowdSecEnrichment:
                 default="TLP:AMBER",
             )
         )
+
+        self.min_delay_between_enrichments = get_config_variable(
+            "CROWDSEC_MIN_DELAY_BETWEEN_ENRICHMENTS",
+            ["crowdsec", "min_delay_between_enrichments"],
+            self.config,
+            default=300,
+            isNumber=True,
+        )
+
+        self.last_enrichment_date_in_description = get_config_variable(
+            "CROWDSEC_LAST_ENRICHMENT_DATE_IN_DESCRIPTION",
+            ["crowdsec", "last_enrichment_date_in_description"],
+            self.config,
+            default=True,
+        )
+
         raw_indicator_create_from = clean_config(
             get_config_variable(
                 "CROWDSEC_INDICATOR_CREATE_FROM",
@@ -94,8 +111,6 @@ class CrowdSecEnrichment:
     def enrich_observable(self, observable: Dict, stix_observable: Dict):
         self.helper.metric.inc("run_count")
         self.helper.metric.state("running")
-        self.helper.log_debug(f"Processing observable {observable}")
-        self.helper.log_debug(f"Processing stix_observable {stix_observable}")
         observable_id = observable["standard_id"]
         ip = observable["value"]
         observable_markings = [
@@ -110,7 +125,7 @@ class CrowdSecEnrichment:
             raise ex
 
         if not cti_data:
-            return
+            return f"No return data from CrowdSec CTI for IP: {ip}"
 
         # Retrieve specific data from CTI
         self.helper.log_debug(f"CTI data for {ip}: {cti_data}")
@@ -187,7 +202,7 @@ class CrowdSecEnrichment:
         self.builder.send_bundle()
 
         self.helper.metric.state("idle")
-        return f"CrowdSec enrichment completed for {ip}"
+        return f"CrowdSec enrichment completed for IP: {ip}"
 
     def _process_message(self, data: Dict):
         observable = data["enrichment_entity"]
@@ -202,7 +217,27 @@ class CrowdSecEnrichment:
                 "Do not send any data, TLP of the observable is greater than MAX TLP"
             )
 
-        self.enrich_observable(observable, stix_observable)
+        # Early return if last enrichment was less than some configured time
+        timestamp = int(time.time())
+        database_observable = self.helper.api.stix_cyber_observable.read(
+            id=observable["standard_id"]
+        )
+        handle_description = handle_observable_description(
+            timestamp, database_observable
+        )
+        time_since_last_enrichment = handle_description["time_since_last_enrichment"]
+        min_delay = self.min_delay_between_enrichments
+        if time_since_last_enrichment != -1 and time_since_last_enrichment < min_delay:
+            message = f"Last enrichment was less than {min_delay} seconds ago, skipping enrichment"
+            self.helper.log_debug(message)
+            return message
+
+        if self.last_enrichment_date_in_description:
+            description = handle_description["description"]
+            self.helper.log_debug(f"Updating observable description: {description}")
+            stix_observable["x_opencti_description"] = description
+
+        return self.enrich_observable(observable, stix_observable)
 
     def start(self) -> None:
         self.helper.log_info("CrowdSec enrichment connector started")
