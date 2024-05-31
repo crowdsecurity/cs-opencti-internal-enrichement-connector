@@ -2,7 +2,7 @@
 """CrowdSec helper module."""
 import datetime
 import re
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 
 from .constants import LAST_ENRICHMENT_PATTERN
 
@@ -48,7 +48,7 @@ def convert_utc_iso_to_timestamp(iso: str) -> int:
 
 def handle_observable_description(
     timestamp: int, stix_observable: Optional[Dict]
-) -> Dict[str, str | int]:
+) -> Dict[str, Any]:
     """Handle the observable description.
 
     We are saving the current timestamp in description to track the last time the observable was enriched by CrowdSec.
