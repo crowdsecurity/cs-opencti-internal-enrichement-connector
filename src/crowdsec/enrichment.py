@@ -31,7 +31,7 @@ class CrowdSecEnrichment:
         )
         self.crowdsec_api_version = clean_config(
             get_config_variable(
-                "CROWDSEC_VERSION",
+                "CROWDSEC_API_VERSION",
                 ["crowdsec", "api_version"],
                 self.config,
                 default="v2",
