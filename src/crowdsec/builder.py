@@ -522,53 +522,76 @@ class CrowdSecBuilder:
         self,
         attack_patterns: List[str],
         markings: List[str],
+        observable_id: Optional[str] = None,
     ) -> None:
-        for country_alpha_2, val in self.target_countries.items():
-            country_info = pycountry.countries.get(alpha_2=country_alpha_2)
-
-            country = Location(
-                id=self.helper.api.location.generate_id(
+        # Create countries only if we have attack patterns or observable_id to link them
+        if attack_patterns or observable_id:
+            for country_alpha_2, val in self.target_countries.items():
+                country_info = pycountry.countries.get(alpha_2=country_alpha_2)
+                country_id = self.helper.api.location.generate_id(
                     name=country_info.name, x_opencti_location_type="Country"
-                ),
-                name=country_info.name,
-                country=(
-                    country_info.official_name
-                    if hasattr(country_info, "official_name")
-                    else country_info.name
-                ),
-                custom_properties={
-                    "x_opencti_location_type": "Country",
-                    "x_opencti_aliases": [
-                        (
-                            country_info.official_name
-                            if hasattr(country_info, "official_name")
-                            else country_info.name
-                        )
-                    ],
-                },
-                created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-                object_marking_refs=markings,
-            )
-
-            self.add_to_bundle([country])
-
-            # Create relationship between country and attack pattern
-            for attack_pattern_id in attack_patterns:
-                country_relationship = Relationship(
-                    id=StixCoreRelationship.generate_id(
-                        "targets",
-                        attack_pattern_id,
-                        country["id"],
-                    ),
-                    relationship_type="targets",
-                    created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
-                    source_ref=attack_pattern_id,
-                    target_ref=country["id"],
-                    confidence=self.helper.connect_confidence_level,
-                    allow_custom=True,
                 )
+                country = Location(
+                    id=country_id,
+                    name=country_info.name,
+                    country=(
+                        country_info.official_name
+                        if hasattr(country_info, "official_name")
+                        else country_info.name
+                    ),
+                    custom_properties={
+                        "x_opencti_location_type": "Country",
+                        "x_opencti_aliases": [
+                            (
+                                country_info.official_name
+                                if hasattr(country_info, "official_name")
+                                else country_info.name
+                            )
+                        ],
+                    },
+                    created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
+                    object_marking_refs=markings,
+                )
+                self.add_to_bundle([country])
+                if observable_id:
+                    sighting = Sighting(
+                        id=StixSightingRelationship.generate_id(
+                            country_id,
+                            observable_id,
+                            first_seen=None,
+                            last_seen=None,
+                        ),
+                        created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
+                        first_seen=None,
+                        last_seen=None,
+                        count=val,
+                        description=f"CrowdSec CTI sighting for country: {country_alpha_2}",
+                        confidence=_get_confidence_level(self.confidence),
+                        object_marking_refs=markings,
+                        external_references=None,
+                        sighting_of_ref=FAKE_INDICATOR_ID,
+                        where_sighted_refs=[country_id],
+                        custom_properties={"x_opencti_sighting_of_ref": observable_id},
+                    )
+                    self.add_to_bundle([sighting])
 
-                self.add_to_bundle([country_relationship])
+                # Create relationship between country and attack pattern
+                for attack_pattern_id in attack_patterns:
+                    country_relationship = Relationship(
+                        id=StixCoreRelationship.generate_id(
+                            "targets",
+                            attack_pattern_id,
+                            country["id"],
+                        ),
+                        relationship_type="targets",
+                        created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
+                        source_ref=attack_pattern_id,
+                        target_ref=country["id"],
+                        confidence=self.helper.connect_confidence_level,
+                        allow_custom=True,
+                    )
+
+                    self.add_to_bundle([country_relationship])
 
     def send_bundle(self) -> bool:
         bundle_objects = self.bundle_objects

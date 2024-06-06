@@ -62,6 +62,13 @@ class CrowdSecEnrichment:
             default=True,
         )
 
+        self.create_targeted_countries_sigthings = get_config_variable(
+            "CROWDSEC_CREATE_TARGETED_COUNTRIES_SIGHTINGS",
+            ["crowdsec", "create_targeted_countries_sightings"],
+            self.config,
+            default=True,
+        )
+
         raw_indicator_create_from = clean_config(
             get_config_variable(
                 "CROWDSEC_INDICATOR_CREATE_FROM",
@@ -181,8 +188,13 @@ class CrowdSecEnrichment:
                 cve, observable_markings, observable_id
             )
         # Handle target countries
-        if attack_patterns:
-            self.builder.handle_target_countries(attack_patterns, observable_markings)
+        self.builder.handle_target_countries(
+            attack_patterns=attack_patterns,
+            markings=observable_markings,
+            observable_id=(
+                observable_id if self.create_targeted_countries_sigthings else None
+            ),
+        )
         # Add note
         if self.create_note:
             self.builder.add_note(

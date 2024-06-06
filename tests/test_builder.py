@@ -36,6 +36,9 @@ class CrowdSecBuilderTest(unittest.TestCase):
         cls.helper.api.note.generate_id.return_value = (
             "note--76cc9e78-e842-55fb-a0a0-8dbe3618cadd"
         )
+        cls.helper.api.location.generate_id.return_value = (
+            "location--76cc9e78-e842-55fb-a0a0-8dbe3618cadd"
+        )
         cls.helper.api.stix2.format_date.return_value = datetime.datetime.utcnow()
         cls.cti_data = load_file("malicious_ip.json")
         cls.indicator = stix2.Indicator(
@@ -283,4 +286,99 @@ class CrowdSecBuilderTest(unittest.TestCase):
                 sighting_2.get("last_seen").timestamp()
             ).strftime("%Y-%m-%dT%H:%M:%SZ"),
             parse(last_seen).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        )
+
+    def test_handle_target_countries(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+
+        attack_patterns = ["attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0"]
+        markings = []
+        observable_id = load_file("observable.json")["standard_id"]
+        builder.handle_target_countries(
+            attack_patterns=attack_patterns,
+            markings=markings,
+            observable_id=observable_id,
+        )
+
+        self.assertEqual(
+            len(builder.bundle_objects), 30
+        )  # 10 countries + 10 relationships + 10 sightings
+        # Check countries
+        self.assertEqual(builder.bundle_objects[0]["name"], "United States")
+        self.assertEqual(builder.bundle_objects[9]["name"], "United Kingdom")
+        # Check sightings
+        self.assertEqual(
+            builder.bundle_objects[10]["sighting_of_ref"],
+            "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8",
+        )
+        self.assertEqual(
+            builder.bundle_objects[10]["description"],
+            "CrowdSec CTI sighting for country: GB",
+        )
+        # Check attack patterns relationships
+        self.assertEqual(
+            builder.bundle_objects[29]["source_ref"],
+            "attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0",
+        )
+
+    def test_handle_target_countries_without_observable(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+
+        attack_patterns = ["attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0"]
+        markings = []
+        builder.handle_target_countries(
+            attack_patterns=attack_patterns,
+            markings=markings,
+            observable_id=None,
+        )
+
+        self.assertEqual(
+            len(builder.bundle_objects), 20
+        )  # 10 countries + 10 relationships
+        # Check countries
+        self.assertEqual(builder.bundle_objects[0]["name"], "United States")
+        self.assertEqual(builder.bundle_objects[8]["name"], "Japan")
+        self.assertEqual(builder.bundle_objects[10]["name"], "Netherlands")
+        # Check attack patterns relationships
+        self.assertEqual(
+            builder.bundle_objects[9]["source_ref"],
+            "attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0",
+        )
+
+    def test_handle_target_countries_without_patterns(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+
+        attack_patterns = []
+        markings = []
+        builder.handle_target_countries(
+            attack_patterns=attack_patterns,
+            markings=markings,
+            observable_id=load_file("observable.json")["standard_id"],
+        )
+
+        self.assertEqual(len(builder.bundle_objects), 20)  # 10 countries + 10 sightings
+        # Check countries
+        self.assertEqual(builder.bundle_objects[0]["name"], "United States")
+        self.assertEqual(builder.bundle_objects[8]["name"], "Japan")
+        self.assertEqual(builder.bundle_objects[10]["name"], "Netherlands")
+        # Check sightings
+        self.assertEqual(
+            builder.bundle_objects[9]["sighting_of_ref"],
+            "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8",
+        )
+        self.assertEqual(
+            builder.bundle_objects[9]["description"],
+            "CrowdSec CTI sighting for country: JP",
         )
