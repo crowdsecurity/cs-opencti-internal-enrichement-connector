@@ -191,9 +191,9 @@ class CrowdSecEnrichment:
         self.builder.handle_target_countries(
             attack_patterns=attack_patterns,
             markings=observable_markings,
-            observable_id=observable_id
-            if self.create_targeted_countries_sigthings
-            else None,
+            observable_id=(
+                observable_id if self.create_targeted_countries_sigthings else None
+            ),
         )
         # Add note
         if self.create_note:
