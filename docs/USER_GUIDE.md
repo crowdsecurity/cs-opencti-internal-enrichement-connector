@@ -67,6 +67,7 @@ Configuration parameters are provided using environment variables as described b
 | `CROWDSEC_CREATE_SIGHTING`                    | No | Boolean | Enable/disable creation of a sighting.<br />Default: `true`                                                                                                                                                                                        |
 | `CROWDSEC_LAST_ENRICHMENT_DATE_IN_DESCRIPTION` | No | Boolean | Enable/disable saving the last CrowdSec enrichment date in observable description.<br />Default: `true` |
 | `CROWDSEC_MIN_DELAY_BETWEEN_ENRICHMENTS` | No | Number | Minimum delay (in seconds) between two CrowdSec enrichments.<br />Default: `300`<br />Use it to avoid too frequent calls to CrowdSec's CTI API.<br />Requires the last CrowdSec enrichment to be saved in the description, as we'll be comparing this date with the current one.<br />If  `CONNECTOR_AUTO` is `true` and if you are also using the [CrowdSec External Import connector](https://github.com/crowdsecurity/cs-opencti-external-import-connector), please ensure to also set `CROWDSEC_IMPORT_LAST_ENRICHMENT_DATE_IN_DESCRIPTION=true`in the external import connector. |
+| `CROWDSEC_CREATE_TARGETED_COUNTRIES_SIGHTINGS` | No | Boolean | Enable/Disable creation of a sighting related to a targeted country<br />Default: `true`<br />Sighting count represents the percentage distribution of the targeted country among all the countries targeted by the attacker. |
 
 You could also use the `config.yml`file of the connector to set the variable.  
 
@@ -93,6 +94,7 @@ You will find a `config.yml.sample` file as example.
   - CROWDSEC_INDICATOR_CREATE_FROM='malicious,suspicious,known'
   - CROWDSEC_CREATE_NOTE=true
   - CROWDSEC_CREATE_SIGHTING=true
+  - CROWDSEC_CREATE_TARGETED_COUNTRIES_SIGHTINGS=false
 
 
 
