@@ -12,7 +12,7 @@ from pycti import OpenCTIConnectorHelper, get_config_variable
 from .builder import CrowdSecBuilder
 from .client import CrowdSecClient, QuotaExceedException
 from .constants import CTI_URL, CTI_API_URL
-from .helper import clean_config, handle_observable_description
+from .helper import clean_config, handle_observable_description, handle_none_cti_value
 
 
 class CrowdSecEnrichment:
@@ -137,8 +137,8 @@ class CrowdSecEnrichment:
         # Retrieve specific data from CTI
         self.helper.log_debug(f"CTI data for {ip}: {cti_data}")
         reputation = cti_data.get("reputation", "")
-        mitre_techniques = cti_data.get("mitre_techniques", [])
-        cves = cti_data.get("cves", [])
+        mitre_techniques = handle_none_cti_value(cti_data.get("mitre_techniques", []))
+        cves = handle_none_cti_value(cti_data.get("cves", []))
 
         # Initialize builder
         self.builder = CrowdSecBuilder(self.helper, self.config, cti_data)
