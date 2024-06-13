@@ -12,7 +12,12 @@ from pycti import OpenCTIConnectorHelper, get_config_variable
 from .builder import CrowdSecBuilder
 from .client import CrowdSecClient, QuotaExceedException
 from .constants import CTI_URL, CTI_API_URL
-from .helper import clean_config, handle_observable_description, handle_none_cti_value
+from .helper import (
+    clean_config,
+    handle_observable_description,
+    handle_none_cti_value,
+    get_ip_version,
+)
 
 
 class CrowdSecEnrichment:
@@ -120,6 +125,9 @@ class CrowdSecEnrichment:
         self.helper.metric.state("running")
         observable_id = observable["standard_id"]
         ip = observable["value"]
+        ip_version = get_ip_version(ip)
+        if not ip_version:
+            return f"Invalid IP address: {ip}"
         observable_markings = [
             objectMarking["standard_id"]
             for objectMarking in observable["objectMarking"]
@@ -158,7 +166,12 @@ class CrowdSecEnrichment:
         self.builder.add_to_bundle([stix_observable])
         # Handle reputation
         if reputation in self.indicator_create_from:
-            pattern = f"[ipv4-addr:value = '{ip}']"
+
+            pattern = (
+                f"[ipv4-addr:value = '{ip}']"
+                if ip_version == 4
+                else f"[ipv6-addr:value = '{ip}']"
+            )
             indicator = self.builder.add_indicator_based_on(
                 observable_id,
                 stix_observable,

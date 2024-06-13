@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """CrowdSec helper module."""
 import datetime
+import ipaddress
 import re
 from typing import Optional, Dict, Any
 
@@ -101,3 +102,11 @@ def handle_none_cti_value(value, default=None):
     if default is None:
         default = []
     return value if value not in (None, "None") else default
+
+
+def get_ip_version(ip: str) -> int:
+    try:
+        ip_obj = ipaddress.ip_address(ip)
+        return ip_obj.version if ip_obj.version in [4, 6] else 0
+    except ValueError:
+        return 0
