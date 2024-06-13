@@ -67,7 +67,7 @@ class CrowdSecEnrichment:
             default=True,
         )
 
-        self.create_targeted_countries_sigthings = get_config_variable(
+        self.create_targeted_countries_sightings = get_config_variable(
             "CROWDSEC_CREATE_TARGETED_COUNTRIES_SIGHTINGS",
             ["crowdsec", "create_targeted_countries_sightings"],
             self.config,
@@ -205,7 +205,7 @@ class CrowdSecEnrichment:
             attack_patterns=attack_patterns,
             markings=observable_markings,
             observable_id=(
-                observable_id if self.create_targeted_countries_sigthings else None
+                observable_id if self.create_targeted_countries_sightings else None
             ),
         )
         # Add note
