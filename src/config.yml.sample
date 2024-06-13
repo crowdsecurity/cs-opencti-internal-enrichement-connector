@@ -6,7 +6,7 @@ connector:
   id: 'ChangeMe' # Add connector ID (any valid UUID v4)
   type: 'INTERNAL_ENRICHMENT'
   name: 'CrowdSec' # Connector name that will be displayed in OpenCTI
-  scope: 'IPv4-Addr' # MIME type or SCO
+  scope: 'IPv4-Addr,IPv6-Addr' # MIME type or SCO
   confidence_level: 100 # From 0 (Unknown) to 100 (Fully trusted)
   log_level: 'error' # Log level (debug, info, warn, error)
   auto: true # Enable/disable auto-enrichment of observables

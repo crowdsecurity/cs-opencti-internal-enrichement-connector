@@ -21,6 +21,7 @@ functions provided by the `src` folder and the following files: `docker-compose.
 
 ### Added
 
+- Add IPv6-Addr scope support
 - Add setting to enable/disable the creation of an Indicator depending on the retrieved CrowdSec's CTI reputation
 - Add setting to enable/disable the creation of an Attack Pattern from Mitre techniques
 - Add setting to enable/disable the creation of a Sighting related to CrowdSec organization
