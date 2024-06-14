@@ -577,61 +577,28 @@ class CrowdSecBuilder:
 
                 # Create relationship between country and indicator/observable
                 if observable_id:
-                    if indicator_id:
-                        sighting = Sighting(
-                            id=StixSightingRelationship.generate_id(
-                                country_id,
-                                observable_id,
-                                first_seen=None,
-                                last_seen=None,
-                            ),
-                            created_by_ref=self.get_or_create_crowdsec_ent()[
-                                "standard_id"
-                            ],
+                    sighting = Sighting(
+                        id=StixSightingRelationship.generate_id(
+                            country_id,
+                            observable_id,
                             first_seen=None,
                             last_seen=None,
-                            count=val,
-                            description=f"CrowdSec CTI sighting for country: {country_alpha_2}",
-                            confidence=_get_confidence_level(self.confidence),
-                            object_marking_refs=markings,
-                            external_references=None,
-                            sighting_of_ref=indicator_id,
-                            where_sighted_refs=[country_id],
-                            custom_properties={
-                                "x_opencti_sighting_of_ref": observable_id
-                            },
-                        )
-                        self.add_to_bundle([sighting])
-                    else:
-                        # We can not bundle countries and sighting relationship without an indicator
-                        # because sighting_of_ref requires to be SDO (and observable is SCO)
-                        country = self.helper.api.location.create(
-                            name=country_info.name,
-                            createdBy=self.get_or_create_crowdsec_ent()["standard_id"],
-                            objectMarking=markings,
-                            type="Country",
-                            country=(
-                                country_info.official_name
-                                if hasattr(country_info, "official_name")
-                                else country_info.name
-                            ),
-                            custom_properties={
-                                "x_opencti_location_type": "Country",
-                                "x_opencti_aliases": [
-                                    (
-                                        country_info.official_name
-                                        if hasattr(country_info, "official_name")
-                                        else country_info.name
-                                    )
-                                ],
-                            },
-                        )
-                        self.helper.api.stix_sighting_relationship.create(
-                            fromId=observable_id,
-                            toId=country["id"],
-                            count=val,
-                            confidence=_get_confidence_level(self.confidence),
-                        )
+                        ),
+                        created_by_ref=self.get_or_create_crowdsec_ent()["standard_id"],
+                        first_seen=None,
+                        last_seen=None,
+                        count=val,
+                        description=f"CrowdSec CTI sighting for country: {country_alpha_2}",
+                        confidence=_get_confidence_level(self.confidence),
+                        object_marking_refs=markings,
+                        external_references=None,
+                        sighting_of_ref=(
+                            indicator_id if indicator_id else FAKE_INDICATOR_ID
+                        ),
+                        where_sighted_refs=[country_id],
+                        custom_properties={"x_opencti_sighting_of_ref": observable_id},
+                    )
+                    self.add_to_bundle([sighting])
 
                 # Create relationship between country and attack pattern
                 for attack_pattern_id in attack_patterns:
