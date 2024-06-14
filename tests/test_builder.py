@@ -204,27 +204,59 @@ class CrowdSecBuilderTest(unittest.TestCase):
 
         indicator = self.indicator
 
-        attach_pattern = builder.add_attack_pattern_for_mitre(
+        attack_pattern = builder.add_attack_pattern_for_mitre(
             mitre_technique={
                 "label": "T1046",
                 "description": "Network Service Scanning ...",
                 "name": "Network Service Scanning",
             },
             markings=[],
-            indicator=indicator,
+            indicator_id=indicator.id,
+            observable_id=None,
             external_references=[],
         )
 
         self.assertEqual(
-            attach_pattern["name"], "MITRE ATT&CK (Network Service Scanning - T1046)"
+            attack_pattern["name"], "MITRE ATT&CK (Network Service Scanning - T1046)"
         )
         # Check bundle
         self.assertEqual(len(builder.bundle_objects), 2)
-        self.assertEqual(builder.bundle_objects[0], attach_pattern)
+        self.assertEqual(builder.bundle_objects[1], attack_pattern)
         # Check relationship
-        relationship = builder.bundle_objects[1]
-        self.assertEqual(relationship["target_ref"], attach_pattern["id"])
+        relationship = builder.bundle_objects[0]
+        self.assertEqual(relationship["target_ref"], attack_pattern["id"])
         self.assertEqual(relationship["relationship_type"], "indicates")
+
+    def test_add_attack_pattern_for_mitre_with_observable_relation(self):
+        builder = CrowdSecBuilder(
+            helper=self.helper,
+            config={},
+            cti_data=self.cti_data,
+        )
+        observable_id = load_file("observable.json")["standard_id"]
+
+        attack_pattern = builder.add_attack_pattern_for_mitre(
+            mitre_technique={
+                "label": "T1046",
+                "description": "Network Service Scanning ...",
+                "name": "Network Service Scanning",
+            },
+            markings=[],
+            indicator_id=None,
+            observable_id=observable_id,
+            external_references=[],
+        )
+
+        self.assertEqual(
+            attack_pattern["name"], "MITRE ATT&CK (Network Service Scanning - T1046)"
+        )
+        # Check bundle
+        self.assertEqual(len(builder.bundle_objects), 2)
+        self.assertEqual(builder.bundle_objects[1], attack_pattern)
+        # Check relationship
+        relationship = builder.bundle_objects[0]
+        self.assertEqual(relationship["target_ref"], attack_pattern["id"])
+        self.assertEqual(relationship["relationship_type"], "related-to")
 
     def test_add_note(self):
         builder = CrowdSecBuilder(
@@ -294,6 +326,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             config={},
             cti_data=self.cti_data,
         )
+        indicator = self.indicator
 
         attack_patterns = ["attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0"]
         markings = []
@@ -302,6 +335,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             attack_patterns=attack_patterns,
             markings=markings,
             observable_id=observable_id,
+            indicator_id=indicator.id,
         )
 
         self.assertEqual(
@@ -313,7 +347,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         # Check sightings
         self.assertEqual(
             builder.bundle_objects[10]["sighting_of_ref"],
-            "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8",
+            "indicator--94c598e8-9174-58e0-9731-316e18f26916",
         )
         self.assertEqual(
             builder.bundle_objects[10]["description"],
@@ -331,6 +365,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             config={},
             cti_data=self.cti_data,
         )
+        indicator = self.indicator
 
         attack_patterns = ["attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0"]
         markings = []
@@ -338,6 +373,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             attack_patterns=attack_patterns,
             markings=markings,
             observable_id=None,
+            indicator_id=indicator.id,
         )
 
         self.assertEqual(
@@ -353,12 +389,13 @@ class CrowdSecBuilderTest(unittest.TestCase):
             "attack-pattern--76a389ac-1746-5f7f-a290-38f84e7d90e0",
         )
 
-    def test_handle_target_countries_without_patterns(self):
+    def test_handle_target_countries_without_attack_patterns(self):
         builder = CrowdSecBuilder(
             helper=self.helper,
             config={},
             cti_data=self.cti_data,
         )
+        indicator = self.indicator
 
         attack_patterns = []
         markings = []
@@ -366,6 +403,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
             attack_patterns=attack_patterns,
             markings=markings,
             observable_id=load_file("observable.json")["standard_id"],
+            indicator_id=indicator.id,
         )
 
         self.assertEqual(len(builder.bundle_objects), 20)  # 10 countries + 10 sightings
@@ -376,7 +414,7 @@ class CrowdSecBuilderTest(unittest.TestCase):
         # Check sightings
         self.assertEqual(
             builder.bundle_objects[9]["sighting_of_ref"],
-            "indicator--51b92778-cef0-4a90-b7ec-ebd620d01ac8",
+            "indicator--94c598e8-9174-58e0-9731-316e18f26916",
         )
         self.assertEqual(
             builder.bundle_objects[9]["description"],
