@@ -34,8 +34,6 @@ crowdsec:
   attack_pattern_create_from_mitre: true # Enable/disable creation of attack patterns from MITRE techniques
   create_note: true # Enable/disable creation of note in observable for each enrichment
   create_sighting: true # Enable/disable creation of sighting for each enrichment
-  add_mitre_ext_ref_to_sighting: true # Enable/disable adding MITRE technique external reference in sighting
-  add_mitre_ext_ref_to_attack_pattern: true # Enable/disable adding MITRE technique external reference in attack pattern
   create_targeted_countries_sightings: true # Enable/disable creation of a sighting for targeted country
   last_enrichment_date_in_description: true # Enable/disable saving the last enrichment date in observable description
   min_delay_between_enrichments: 300 # Minimum delay between two CrowdSec enrichments in seconds. (Use last enrichment date saved in description.)

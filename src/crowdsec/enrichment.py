@@ -42,7 +42,6 @@ class CrowdSecEnrichment:
                 default="v2",
             )
         )
-
         self.max_tlp = clean_config(
             get_config_variable(
                 "CROWDSEC_MAX_TLP",
@@ -51,7 +50,6 @@ class CrowdSecEnrichment:
                 default="TLP:AMBER",
             )
         )
-
         self.min_delay_between_enrichments = get_config_variable(
             "CROWDSEC_MIN_DELAY_BETWEEN_ENRICHMENTS",
             ["crowdsec", "min_delay_between_enrichments"],
@@ -59,21 +57,18 @@ class CrowdSecEnrichment:
             default=300,
             isNumber=True,
         )
-
         self.last_enrichment_date_in_description = get_config_variable(
             "CROWDSEC_LAST_ENRICHMENT_DATE_IN_DESCRIPTION",
             ["crowdsec", "last_enrichment_date_in_description"],
             self.config,
             default=True,
         )
-
         self.create_targeted_countries_sightings = get_config_variable(
             "CROWDSEC_CREATE_TARGETED_COUNTRIES_SIGHTINGS",
             ["crowdsec", "create_targeted_countries_sightings"],
             self.config,
             default=True,
         )
-
         raw_indicator_create_from = clean_config(
             get_config_variable(
                 "CROWDSEC_INDICATOR_CREATE_FROM",
@@ -82,58 +77,37 @@ class CrowdSecEnrichment:
                 default="",
             )
         )
-
         self.indicator_create_from = raw_indicator_create_from.split(",")
-
         self.attack_pattern_create_from_mitre = get_config_variable(
             "CROWDSEC_ATTACK_PATTERN_CREATE_FROM_MITRE",
             ["crowdsec", "attack_pattern_create_from_mitre"],
             self.config,
             default=False,
         )
-
-        self.add_mitre_ext_ref_to_attack_pattern = get_config_variable(
-            "CROWDSEC_ADD_MITRE_EXT_REF_TO_ATTACK_PATTERN",
-            ["crowdsec", "add_mitre_ext_ref_to_attack_pattern"],
-            self.config,
-            default=True,
-        )
-
         self.vulnerability_create_from_cve = get_config_variable(
             "CROWDSEC_VULNERABILITY_CREATE_FROM_CVE",
             ["crowdsec", "vulnerability_create_from_cve"],
             self.config,
             default=True,
         )
-
         self.create_note = get_config_variable(
             "CROWDSEC_CREATE_NOTE",
             ["crowdsec", "create_note"],
             self.config,
             default=False,
         )
-
         self.create_sighting = get_config_variable(
             "CROWDSEC_CREATE_SIGHTING",
             ["crowdsec", "create_sighting"],
             self.config,
             default=True,
         )
-
-        self.add_mitre_ext_ref_to_sighting = get_config_variable(
-            "CROWDSEC_ADD_MITRE_EXT_REF_TO_SIGHTING",
-            ["crowdsec", "add_mitre_ext_ref_to_sighting"],
-            self.config,
-            default=True,
-        )
-
         if self.crowdsec_api_version != "v2":
             raise Exception(
                 f"crowdsec api version '{self.crowdsec_api_version}' is not supported "
             )
         else:
             self.api_base_url = f"{CTI_API_URL}{self.crowdsec_api_version}/"
-
         self.client = CrowdSecClient(
             helper=self.helper,
             url=self.api_base_url,
@@ -202,24 +176,13 @@ class CrowdSecEnrichment:
         # Handle mitre_techniques
         attack_patterns = []
         for mitre_technique in mitre_techniques:
-            mitre_external_reference = None
-            if (
-                self.add_mitre_ext_ref_to_sighting
-                or self.add_mitre_ext_ref_to_attack_pattern
-            ):
-                mitre_external_reference = self.builder.create_external_ref_for_mitre(
-                    mitre_technique
-                )
-                if self.add_mitre_ext_ref_to_sighting:
-                    sighting_ext_refs.append(mitre_external_reference)
+            mitre_external_reference = self.builder.create_external_ref_for_mitre(
+                mitre_technique
+            )
+            sighting_ext_refs.append(mitre_external_reference)
             # Create attack pattern
             if self.attack_pattern_create_from_mitre:
-                ext_ref = (
-                    [mitre_external_reference]
-                    if self.add_mitre_ext_ref_to_attack_pattern
-                    else None
-                )
-
+                ext_ref = [mitre_external_reference]
                 attack_pattern = self.builder.add_attack_pattern_for_mitre(
                     mitre_technique=mitre_technique,
                     markings=observable_markings,
