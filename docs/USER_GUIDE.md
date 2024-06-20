@@ -67,7 +67,7 @@ Configuration parameters are provided using environment variables as described b
 | `CROWDSEC_CREATE_NOTE`                        | No | Boolean | Enable/disable creation of a note in observable for each enrichment.<br />Default: `false`                                                                                                                                                         |
 | `CROWDSEC_CREATE_SIGHTING`                    | No | Boolean | Enable/disable creation of a sighting of observable related to CrowdSec organization.<br />Default: `true`                                                                                                                                         |
 | `CROWDSEC_LAST_ENRICHMENT_DATE_IN_DESCRIPTION` | No | Boolean | Enable/disable saving the last CrowdSec enrichment date in observable description.<br />Default: `true` |
-| `CROWDSEC_MIN_DELAY_BETWEEN_ENRICHMENTS` | No | Number | Minimum delay (in seconds) between two CrowdSec enrichments.<br />Default: `300`<br />Use it to avoid too frequent calls to CrowdSec's CTI API.<br />Requires the last CrowdSec enrichment to be saved in the description, as we'll be comparing this date with the current one.<br />If  `CONNECTOR_AUTO` is `true` and if you are also using the [CrowdSec External Import connector](https://github.com/crowdsecurity/cs-opencti-external-import-connector), please ensure to also set `CROWDSEC_IMPORT_LAST_ENRICHMENT_DATE_IN_DESCRIPTION=true`in the external import connector. |
+| `CROWDSEC_MIN_DELAY_BETWEEN_ENRICHMENTS` | No | Number | Minimum delay (in seconds) between two CrowdSec enrichments.<br />Default: `300`<br />Use it to avoid too frequent calls to CrowdSec's CTI API.<br />Requires the last CrowdSec enrichment to be saved in the description, as we'll be comparing this date with the current one.<br />If  `CONNECTOR_AUTO` is `true` and if you are also using the [CrowdSec External Import connector](https://github.com/crowdsecurity/cs-opencti-external-import-connector), please ensure to also set `CROWDSEC_LAST_ENRICHMENT_DATE_IN_DESCRIPTION=true`in the external import connector. |
 | `CROWDSEC_CREATE_TARGETED_COUNTRIES_SIGHTINGS` | No | Boolean | Enable/Disable creation of a sighting of observable related to a targeted country<br />Default: `true`<br />Sighting count represents the percentage distribution of the targeted country among all the countries targeted by the attacker. |
 
 You could also use the `config.yml`file of the connector to set the variable.  
@@ -101,7 +101,7 @@ You will find a `config.yml.sample` file as example.
 
 ### Use case: enrich an observable
 
-If you create an `IPv4 address` observable, this connector will enable you to enrich it with data retrieved from CrowdSec's CTI. 
+If you create a `IPv4 address` or `IPv6 address` observable, this connector will enable you to enrich it with data retrieved from CrowdSec's CTI. 
 
 If `CONNECTOR_AUTO` configuration is set to `true`, the observable will be automatically enriched when created. Otherwise, you'll need to enrich it manually by clicking on the enrichment icon and selecting the CrowdSec connector.
 
@@ -120,7 +120,7 @@ Assuming you have an observable whose `IPv4-Addr` value is equal to `146.70.186.
   - A list of relationships:
     - `related` relationships leading to vulnerabilities created from CVEs
     - `based-on` relationship leading to a CrowdSec CTI  indicator
-  - A sighting related to CrowdSec with the first and last seen informations
+  - A sighting related to CrowdSec with the first and last seen information
 - As the `CROWDSEC_INDICATOR_CREATE_FROM` recommended setting contains `malicious` reputation, an indicator has been created with:
   - An external reference to the blocking list from which the flagged IP originates.
   - A list of `indicates` relationship leading to attack patterns created using mitre techniques
@@ -132,5 +132,5 @@ Assuming you have an observable whose `IPv4-Addr` value is equal to `146.70.186.
 
 ### Additional information
 
-This connector will lookup and edit incoming `IPv4-Addr` observable entity.
+This connector will lookup and edit incoming `IPv4-Addr` or `Ipv6-Addr` observable entity.
 Note that CrowdSec's CTI has quotas, this connector will poll it if quota is exceeded following exponential backoff.
