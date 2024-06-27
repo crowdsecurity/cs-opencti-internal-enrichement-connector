@@ -4,7 +4,7 @@ import datetime
 import json
 import os
 import unittest
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import MagicMock
 
 import stix2
 from dateutil.parser import parse
