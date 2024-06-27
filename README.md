@@ -21,5 +21,8 @@ See [Installation Guide](https://github.com/crowdsecurity/cs-opencti-internal-en
 See [Developer guide](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/blob/main/docs/DEVELOPER.md)
 
 
+## Notice
 
+We're also working on an external import connector.
 
+If you'd like to test the version currently under development, you'll find the sources [here](https://github.com/crowdsecurity/cs-opencti-external-import-connector).

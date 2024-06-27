@@ -10,7 +10,7 @@ functions provided by the `src` folder and the following files: `docker-compose.
 
 ---
 
-## [1.1.0](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/releases/tag/v1.1.0) - 2024-??-??
+## [1.1.0](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/releases/tag/v1.1.0) - 2024-06-27
 [_Compare with previous release_](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/compare/v1.0.0...v1.1.0)
 
 ### Changed
