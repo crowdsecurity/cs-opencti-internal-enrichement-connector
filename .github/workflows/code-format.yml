@@ -35,3 +35,11 @@ jobs:
     - name: Code format check
       run: |
         black --check -v ./
+
+    - name: isort check
+      run: |
+        isort --skip src/env --profile black --check ./
+
+    - name : flake8 check
+      run: |
+        flake8 --ignore=E,W --exclude src/env ./
