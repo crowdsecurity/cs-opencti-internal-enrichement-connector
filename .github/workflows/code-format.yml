@@ -19,9 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+    env:
+      SOURCES: "crowdsec-opencti-internal-enrichment-connector"
+
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        path: ${{ env.SOURCES }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -29,17 +34,18 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd ${{ env.SOURCES }}
         python -m pip install --upgrade pip
         python -m pip install -r tests/test-requirements.txt
 
     - name: Code format check
       run: |
-        black --check -v ./
+        black --check -v ./${{ env.SOURCES }}
 
     - name: isort check
       run: |
-        isort --skip src/env --profile black --check ./
+        isort --profile black --check ./${{ env.SOURCES }}
 
     - name : flake8 check
       run: |
-        flake8 --ignore=E,W --exclude src/env ./
+        flake8 --ignore=E,W  ./${{ env.SOURCES }}
