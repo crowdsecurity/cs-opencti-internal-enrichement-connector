@@ -44,8 +44,8 @@ jobs:
 
     - name: isort check
       run: |
-        isort --profile black --check ./${{ env.SOURCES }}
+        isort --profile black --check -v ./${{ env.SOURCES }}
 
     - name : flake8 check
       run: |
-        flake8 --ignore=E,W  ./${{ env.SOURCES }}
+        flake8 --ignore=E,W -v ./${{ env.SOURCES }}
