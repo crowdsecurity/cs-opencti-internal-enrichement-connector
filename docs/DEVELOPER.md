@@ -39,9 +39,9 @@ crowdsec-opencti (choose the name you want for this folder)
 │   │   
 │   │ (Clone of https://github.com/OpenCTI-Platform/docker)
 │
-└───connectors (do not change this folder name)
+└───connectors (do not change this folder name; Only needed for OpenCTI Pull Request process)
 │   │
-│   │ (Clone of a fork of https://github.com/OpenCTI-Platform/connectors; Only required for release process)
+│   │ (Clone of https://github.com/crowdsecurity/connectors)
 │
 └───cs-opencti-internal-enrichment-connector (do not change this folder name)
     │   
