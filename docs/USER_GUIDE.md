@@ -10,10 +10,7 @@
 
 - [Description](#description)
   - [Configuration](#configuration)
-    - [Parameters meaning](#parameters-meaning)
-    - [Recommended settings](#recommended-settings)
   - [Use case: enrich an observable](#use-case-enrich-an-observable)
-    - [Example: Enrichment with recommended settings](#example-enrichment-with-recommended-settings)
   - [Additional information](#additional-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->

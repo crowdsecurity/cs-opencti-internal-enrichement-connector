@@ -14,7 +14,11 @@
   - [Stop Docker environment](#stop-docker-environment)
 - [Unit tests](#unit-tests)
 - [Update documentation table of contents](#update-documentation-table-of-contents)
-- [Release process](#release-process)
+- [OpenCTI Pull Request](#opencti-pull-request)
+  - [Sync fork with upstream](#sync-fork-with-upstream)
+  - [Update fork sources](#update-fork-sources)
+  - [During the pull request review](#during-the-pull-request-review)
+  - [Once pull request is merged](#once-pull-request-is-merged)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -34,7 +38,11 @@ crowdsec-opencti (choose the name you want for this folder)
 └───docker
 │   │   
 │   │ (Clone of https://github.com/OpenCTI-Platform/docker)
-│   
+│
+└───connectors (do not change this folder name)
+│   │
+│   │ (Clone of a fork of https://github.com/OpenCTI-Platform/connectors; Only required for release process)
+│
 └───cs-opencti-internal-enrichment-connector (do not change this folder name)
     │   
     │ (Clone of this repo)
@@ -130,6 +138,8 @@ Then, run tests:
 python -m pytest -v
 ```
 
+
+
 ## Update documentation table of contents
 
 To update the table of contents in the documentation, you can use [the `doctoc` tool](https://github.com/thlorenz/doctoc).
@@ -143,13 +153,174 @@ npm install -g doctoc
 Then, run it in the documentation folder:
 
 ```bash
-doctoc docs/*
+doctoc docs/* --maxlevel 3
 ```
 
 
 
-## Release process
+## OpenCTI Pull Request
+
+To make an update publicly available, we need to submit a pull request to the [OpenCTI connectors repository](https://github.com/OpenCTI-Platform/connectors), and to submit a pull request, we use the CrowdSec [connectors fork](https://github.com/crowdsecurity/connectors).
+
+### Sync fork with upstream
+
+Before modifying the code of our fork, we need to sync it from the upstream repo. There are many way to do it. Below is what you can do locally.
+
+Using your local connectors folder defined [above](#prepare-local-environment), you should define two Git remote: origin (the fork) and upstream (the OpenCTI repo).
+You can check that with the following command: 
+
+```shell
+cd connectors
+git remote -v
+```
+
+You should see the following result:
+
+```
+origin	git@github.com:crowdsecurity/connectors.git (fetch)
+origin	git@github.com:crowdsecurity/connectors.git (push)
+upstream	git@github.com:OpenCTI-Platform/connectors.git (fetch)
+upstream	git@github.com:OpenCTI-Platform/connectors.git (push)
+```
 
 
 
- 
+Once you have this, you can force update the fork master branch :
+
+```shell
+git checkout master
+git fetch upstream
+git reset --hard upstream/master
+git push origin master --force 
+```
+
+
+
+### Update fork sources
+
+#### Create a release
+
+Before creating a release, ensure to format correctly the `CHANGELOG.md` file and to update the `src/crowdsec/client.py` to update the user agent with the next version number. Then, you can use the [Create Release action](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/actions/workflows/release.yml).
+
+#### Retrieve zip for release
+
+At the end of the Create Release action run, you can download a zip containing the relevant files.  
+
+#### Create a branch for the Pull Request
+
+If your release is `vX.Y.Z`, you can create a `feat/release-X-Y-Z` branch:
+
+```shell
+cd connectors
+git checkout -b feat/release-X-Y-Z
+```
+
+#### Update sources
+
+ Before all, remove all files in the CrowdSec connector folder:
+
+```shell
+cd connectors
+rm -rf internal-enrichment/crowdsec/* internal-enrichment/crowdsec/.*
+```
+
+Then, unzip the `crowdsec-opencti-internal-enrichment-connector-X.Y.Z.zip` archive in the CrowdSec connector folder:
+
+```shell
+unzip /path/to/crowdsec-opencti-internal-enrichment-connector-X.Y.Z.zip -d internal-enrichment/crowdsec
+```
+
+Now, you can verify the diff and you will probably need to update OpenCTI version in `docker-compose.yml` and `src/requirements.txt` files.
+
+Once all seems fine, add and commit your modifications:
+
+```shell
+git add .
+git commit -m "[crowdsec] Update internal enrichment connector (vX.Y.Z)"
+```
+
+#### Test locally before pull request 
+
+You can test with the docker local stack by using this kind of snippet in the `docker-compose.yml` file of your docker folder defined [above](#prepare-local-environment):
+
+```yaml
+connector-crowdsec:
+    build:
+      context: ../connectors/internal-enrichment/crowdsec/
+      dockerfile: Dockerfile
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=35f117d3-508f-4306-ac18-01b8c3e741fd
+      - CONNECTOR_TYPE=INTERNAL_ENRICHMENT
+      - CONNECTOR_NAME=CrowdSec
+      - CONNECTOR_SCOPE=IPv4-Addr,IPv6-Addr # MIME type or Stix Object
+      - CONNECTOR_CONFIDENCE_LEVEL=100 # From 0 (Unknown) to 100 (Fully trusted)
+      - CONNECTOR_LOG_LEVEL=debug
+      - CONNECTOR_AUTO=false
+      - CROWDSEC_KEY=**************************** # Api Key
+      - CROWDSEC_VERSION=v2 #v2 is the only supported version for now
+    restart: always
+    depends_on:
+      - opencti
+```
+
+#### Open a Pull request
+
+Push your modification 
+
+```shell
+git push origin git push origin feat/release-1.1.0
+```
+
+Now you can use the `feat/release-X-Y-Z` branch to open a pull request in the OpenCTI repository.
+For the pull request description, you could use the release version description that you wrote in the `CHANGELOG.md` file.
+
+
+
+### During the pull request review
+
+As long as the pull request is in review state, we should not create a new release. If there are modifications to do, we can do it directly on the `feat/release-1.1.0`. If possible, all changes made to pass the pull request review should be back ported to a `feat/pr-review-X-Y-Z` branch created in this repository:
+
+
+```shell
+cd cs-opencti-internal-enrichment-connector
+git checkout main
+git checkout -b feat/pr-review-X-Y-Z
+```
+
+
+
+### Once pull request is merged
+
+Once the connectors repository has merged our updates, we need to sync the merged `internal-enrichment/crowdsec` sources with this repo.
+
+#### Sync fork with upstream
+
+First, sync the connector fork like we did [here](#sync-fork-with-upstream). 
+
+#### Retrieve last version
+
+After this, you should have the last version of the CrowdSec internal enrichment connector in `connectors/internal-enrichment/crowdsec` folder.
+
+You need to retrieve it and commit the differences.
+
+```shell
+cd cs-opencti-internal-enrichment-connector
+git checkout feat/pr-review-X-Y-Z
+```
+
+Delete all folders except `.git` and `.github` folders (this 2 specific folders did not belongs to the release zip archive)
+
+Copy all files from the connector's fork: 
+
+```
+cp -r ../connectors/internal-enrichment/crowdsec/. ./
+```
+
+Add and commit the result. Push the `feat/pr-review-X-Y-Z` and merge it into `main` with a pull request.
+
+
+
+
+
