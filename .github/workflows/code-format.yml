@@ -48,4 +48,5 @@ jobs:
 
     - name : flake8 check
       run: |
-        flake8 -v -v ./${{ env.SOURCES }}
+        cd ${{ env.SOURCES }}
+        flake8 -v -v ./
