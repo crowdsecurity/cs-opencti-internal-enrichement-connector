@@ -48,4 +48,4 @@ jobs:
 
     - name : flake8 check
       run: |
-        flake8 --ignore=E,W -v ./${{ env.SOURCES }}
+        flake8 -v -v ./${{ env.SOURCES }}
