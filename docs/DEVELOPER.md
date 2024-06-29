@@ -273,7 +273,7 @@ Push your modification
 git push origin git push origin feat/release-1.1.0
 ```
 
-Now you can use the `feat/release-X-Y-Z` branch to open a pull request in the OpenCTI repository.
+Now you can use the `feat/release-X.Y.Z` branch to open a pull request in the OpenCTI repository.
 For the pull request description, you could use the release version description that you wrote in the `CHANGELOG.md` file.
 
 
@@ -286,7 +286,7 @@ As long as the pull request is in review state, we should not create a new relea
 ```shell
 cd cs-opencti-internal-enrichment-connector
 git checkout main
-git checkout -b feat/pr-review-X-Y-Z
+git checkout -b feat/pr-review-X.Y.Z
 ```
 
 
@@ -307,7 +307,7 @@ You need to retrieve it and commit the differences.
 
 ```shell
 cd cs-opencti-internal-enrichment-connector
-git checkout feat/pr-review-X-Y-Z
+git checkout feat/pr-review-X.Y.Z
 ```
 
 Delete all folders except `.git` and `.github` folders (this 2 specific folders did not belongs to the release zip archive)

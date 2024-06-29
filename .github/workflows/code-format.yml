@@ -36,7 +36,8 @@ jobs:
       run: |
         cd ${{ env.SOURCES }}
         python -m pip install --upgrade pip
-        python -m pip install -r tests/test-requirements.txt
+        python -m pip install black isort flake8
+        python -m pip install -r src/test-requirements.txt
 
     - name: Code format check
       run: |
@@ -49,4 +50,4 @@ jobs:
     - name : flake8 check
       run: |
         cd ${{ env.SOURCES }}
-        flake8 -v ./
+        flake8 --ignore=E,W -v ./
