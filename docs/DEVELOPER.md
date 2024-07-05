@@ -270,7 +270,7 @@ connector-crowdsec:
 Push your modification 
 
 ```shell
-git push origin git push origin feat/release-1.1.0
+git push origin git push origin feat/release-X.Y.Z
 ```
 
 Now you can use the `feat/release-X.Y.Z` branch to open a pull request in the OpenCTI repository.
@@ -280,8 +280,9 @@ For the pull request description, you could use the release version description 
 
 ### During the pull request review
 
-As long as the pull request is in review state, we should not create a new release. If there are modifications to do, we can do it directly on the `feat/release-1.1.0`. If possible, all changes made to pass the pull request review should be back ported to a `feat/pr-review-X-Y-Z` branch created in this repository:
-
+As long as the pull request is in review state, we should not create a new release. 
+If there are modifications to do, we can do it directly on the `feat/release-X.Y.Z`. 
+All changes made to pass the pull request review must be back ported to a `feat/pr-review-X-Y-Z` branch created in this repository:
 
 ```shell
 cd cs-opencti-internal-enrichment-connector
@@ -290,10 +291,10 @@ git checkout -b feat/pr-review-X.Y.Z
 ```
 
 
-
 ### Once pull request is merged
 
-Once the connectors repository has merged our updates, we need to sync the merged `internal-enrichment/crowdsec` sources with this repo.
+Once the connectors repository has merged our updates, and once OpenCTI has published a new release of connectors with the updates, 
+we need to sync the merged `internal-enrichment/crowdsec` sources with this repo.
 
 #### Sync fork with upstream
 
@@ -321,6 +322,16 @@ cp -r ../connectors/internal-enrichment/crowdsec/. ./
 Add and commit the result. Push the `feat/pr-review-X-Y-Z` and merge it into `main` with a pull request.
 
 
+#### Create a new minor release
+
+Once the `main` branch is updated, you can create a new minor `X.Y+1.0` release with the following CHANGELOG content:
+
+```
+## Changed
+
+- Synchronize content with OpenCTI connector's release [A.B.C](https://github.com/OpenCTI-Platform/connectors/releases/tag/A.B.C)
+
+```
 
 
 

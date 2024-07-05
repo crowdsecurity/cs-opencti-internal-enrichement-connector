@@ -28,7 +28,7 @@ class CrowdSecClient:
                 urljoin(self.url, f"smoke/{ip}"),
                 headers={
                     "x-api-key": self.api_key,
-                    "User-Agent": "crowdsec-opencti/v1.1.0",
+                    "User-Agent": "crowdsec-opencti/v1.2.0",
                 },
             )
             if resp.status_code == 404:
