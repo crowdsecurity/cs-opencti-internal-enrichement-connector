@@ -51,4 +51,4 @@ functions provided by the `src` folder and the following files: `docker-compose.
 
 ## [1.0.0](https://github.com/crowdsecurity/cs-opencti-internal-enrichment-connector/releases/tag/v1.0.0) - 2024-04-19
 
-- Initial release
+- Initial release: synchronization with OpenCTI `6.0.9` release
